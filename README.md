@@ -41,10 +41,11 @@ O projeto utiliza um ambiente virtual global na raiz.
 
 ## ▶️ Como Rodar
 
-Abra o terminal na pasta raiz do projeto (`.../Relatorios`) e execute:
+Para que as credenciais sejam carregadas corretamente, **execute a partir da pasta `Menu`**:
 
 ```powershell
-.\.venv\Scripts\python.exe -m streamlit run Menu/app.py
+cd Menu
+..\.venv\Scripts\python.exe -m streamlit run app.py
 ```
 
 O sistema estará acessível em: `http://localhost:8507`

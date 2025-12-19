@@ -1,0 +1,6 @@
+﻿streamlit
+pandas
+pyodbc
+openpyxl
+# Para Python <3.11
+# tomli; python_version<"3.11"

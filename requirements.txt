@@ -1,0 +1,6 @@
+streamlit
+pandas
+openpyxl
+msal
+# pyodbc usually requires system dependencies (unixodbc-dev)
+pyodbc

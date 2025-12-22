@@ -16,14 +16,7 @@ REDIRECT_PATH = "/"  # A aplicação roda na raiz
 # Ex: http://localhost:8507/
 #
 def get_redirect_uri():
-    """Helper para obter a URI de redirecionamento correta."""
-    if "azure" in st.secrets and "redirect_uri" in st.secrets["azure"]:
-        return st.secrets["azure"]["redirect_uri"]
-    
-    # Detecção básica de ambiente
-    if os.getenv("STREAMLIT_SERVER_PORT"):
-        return f"http://localhost:{os.getenv('STREAMLIT_SERVER_PORT')}/"
-        
+    # FORÇANDO URL DE PRODUÇÃO PARA TESTE
     return "https://painel-de-relatorios.streamlit.app/"
 
 SCOPE = ["User.Read"]

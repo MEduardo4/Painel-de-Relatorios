@@ -115,8 +115,9 @@ def check_authentication():
                 st.session_state["user_info"] = token_result.get("id_token_claims", {})
                 st.session_state["access_token"] = token_result["access_token"]
                 
-                # Limpa o código da URL para ficar limpo
-                st.query_params.clear()
+                # LEITURA DE TOKEN SUCESSO
+                # Comentando limpeza de URL para teste de loop
+                # st.query_params.clear()
                 
                 # EM VEZ DE RERUN, Vamos parar e pedir confirmação.
                 # Isso evita o loop infinito se houver algum redirecionamento automático

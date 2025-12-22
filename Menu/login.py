@@ -52,7 +52,7 @@ def render_login():
 
         # Lógica de Autenticação
         auth_service = AuthService()
-        redirect_uri = "http://localhost:8507/" 
+        redirect_uri = "https://painel-de-relatorios.streamlit.app/" 
         
         # Gera URL direto e mostra botão único
         auth_url = auth_service.get_auth_url(redirect_uri)
@@ -95,7 +95,7 @@ def check_authentication():
     if "code" in query_params:
         code = query_params["code"]
         auth_service = AuthService()
-        redirect_uri = "http://localhost:8507/" # Atualizado para a porta mais recente
+        redirect_uri = "https://painel-de-relatorios.streamlit.app/" # Atualizado para a porta mais recente
         
         try:
             token_result = auth_service.get_token_from_code(code, redirect_uri)

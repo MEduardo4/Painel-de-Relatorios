@@ -14,6 +14,17 @@ REDIRECT_PATH = "/"  # A aplicação roda na raiz
 # Se rodar localmente, o Streamlit costuma usar http://localhost:8501 ou 8507
 # Confirme a porta que o seu app está usando e registre no Azure URI de Redirecionamento
 # Ex: http://localhost:8507/
+#
+def get_redirect_uri():
+    """Helper para obter a URI de redirecionamento correta."""
+    if "azure" in st.secrets and "redirect_uri" in st.secrets["azure"]:
+        return st.secrets["azure"]["redirect_uri"]
+    
+    # Detecção básica de ambiente
+    if os.getenv("STREAMLIT_SERVER_PORT"):
+        return f"http://localhost:{os.getenv('STREAMLIT_SERVER_PORT')}/"
+        
+    return "https://painel-de-relatorios.streamlit.app/"
 
 SCOPE = ["User.Read"]
 

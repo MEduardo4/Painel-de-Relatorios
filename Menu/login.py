@@ -51,19 +51,14 @@ def render_login():
         st.markdown("<p style='text-align: center;' class='login-subtext'>Entre com sua conta corporativa para acessar</p>", unsafe_allow_html=True)
 
         # Lógica de Autenticação
+        try:
+            from Menu.auth import AuthService, get_redirect_uri
+        except ImportError:
+             from .auth import AuthService, get_redirect_uri
+             
         auth_service = AuthService()
-
-        # Tenta pegar a URL de redirecionamento dos secrets ou decide dinamicamente
-        if "redirect_uri" in st.secrets["azure"]:
-             redirect_uri = st.secrets["azure"]["redirect_uri"]
-        elif os.getenv("STREAMLIT_SERVER_PORT"): 
-             # Fallback para ambiente local se não definido
-             port = os.getenv("STREAMLIT_SERVER_PORT")
-             redirect_uri = f"http://localhost:{port}/"
-        else:
-             # Fallback para cloud se não achar nada
-             redirect_uri = "https://painel-de-relatorios.streamlit.app/"
-
+        redirect_uri = get_redirect_uri()
+        
         # Gera URL direto e mostra botão único
         auth_url = auth_service.get_auth_url(redirect_uri)
         
@@ -104,17 +99,14 @@ def check_authentication():
     query_params = st.query_params
     if "code" in query_params:
         code = query_params["code"]
-        auth_service = AuthService()
-        auth_service = AuthService()
         
-        # Mesma lógica para garantir consistência
-        if "redirect_uri" in st.secrets["azure"]:
-             redirect_uri = st.secrets["azure"]["redirect_uri"]
-        elif os.getenv("STREAMLIT_SERVER_PORT"): 
-             port = os.getenv("STREAMLIT_SERVER_PORT")
-             redirect_uri = f"http://localhost:{port}/"
-        else:
-             redirect_uri = "https://painel-de-relatorios.streamlit.app/"
+        try:
+            from Menu.auth import AuthService, get_redirect_uri
+        except ImportError:
+             from .auth import AuthService, get_redirect_uri
+             
+        auth_service = AuthService()
+        redirect_uri = get_redirect_uri()
         
         try:
             token_result = auth_service.get_token_from_code(code, redirect_uri)
@@ -125,12 +117,11 @@ def check_authentication():
                 
                 # Limpa o código da URL para ficar limpo
                 st.query_params.clear()
-                # Hack: às vezes o clear() não persiste imediatamente antes do rerun em cloud
-                # Forçar update manual se necessário, mas o st.query_params atual deve lidar com isso.
                 st.rerun()
                 return True
             else:
-                st.error(f"Erro ao autenticar: {token_result.get('error_description')}")
+                st.error(f"Erro de Autenticação: {token_result.get('error_description')}")
+                st.write(f"Debug: Esperava redirect_uri={redirect_uri}")
         except Exception as e:
             st.error(f"Ocorreu um erro durante o login: {str(e)}")
             

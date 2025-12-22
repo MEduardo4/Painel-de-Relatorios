@@ -125,6 +125,8 @@ def check_authentication():
                 
                 # Limpa o código da URL para ficar limpo
                 st.query_params.clear()
+                # Hack: às vezes o clear() não persiste imediatamente antes do rerun em cloud
+                # Forçar update manual se necessário, mas o st.query_params atual deve lidar com isso.
                 st.rerun()
                 return True
             else:

@@ -117,7 +117,15 @@ def check_authentication():
                 
                 # Limpa o código da URL para ficar limpo
                 st.query_params.clear()
-                st.rerun()
+                
+                # EM VEZ DE RERUN, Vamos parar e pedir confirmação.
+                # Isso evita o loop infinito se houver algum redirecionamento automático
+                st.success("Login realizado com sucesso!")
+                if st.button("🚀 Clique aqui para acessar o sistema"):
+                    st.rerun()
+                
+                # Retorna True para que o resto do script não renderize o login novamente na mesma passada (se possível)
+                # Mas sem rerun, ele vai continuar a execução do script.
                 return True
             else:
                 st.error(f"Erro de Autenticação: {token_result.get('error_description')}")

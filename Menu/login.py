@@ -1,6 +1,9 @@
 import streamlit as st
 import os
-from Menu.auth import AuthService
+try:
+    from Menu.auth import AuthService
+except ImportError:
+    from .auth import AuthService
 import base64
 
 def get_base64_image(image_path):

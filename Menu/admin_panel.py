@@ -1,7 +1,11 @@
 import streamlit as st
 import pandas as pd
-from Menu.permissions import load_permissions, save_permissions, ADMIN_EMAIL
-from Menu.logging_service import get_logs
+try:
+    from Menu.permissions import load_permissions, save_permissions, ADMIN_EMAIL
+    from Menu.logging_service import get_logs
+except ImportError:
+    from .permissions import load_permissions, save_permissions, ADMIN_EMAIL
+    from .logging_service import get_logs
 
 def render_admin_panel():
     """Renderiza a tela de administração de acessos."""

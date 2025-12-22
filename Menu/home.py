@@ -3,8 +3,12 @@ import streamlit as st
 def render_home_menu():
     """Renderiza o Menu Principal com opções de relatórios."""
     
-from Menu.permissions import ADMIN_EMAIL
-from Menu.logging_service import log_access
+try:
+    from Menu.permissions import ADMIN_EMAIL
+    from Menu.logging_service import log_access
+except ImportError:
+    from .permissions import ADMIN_EMAIL
+    from .logging_service import log_access
 
 def render_home_menu():
     """Renderiza o Menu Principal com opções de relatórios."""

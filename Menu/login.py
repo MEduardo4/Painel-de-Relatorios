@@ -52,8 +52,18 @@ def render_login():
 
         # Lógica de Autenticação
         auth_service = AuthService()
-        redirect_uri = "https://painel-de-relatorios.streamlit.app/" 
-        
+
+        # Tenta pegar a URL de redirecionamento dos secrets ou decide dinamicamente
+        if "redirect_uri" in st.secrets["azure"]:
+             redirect_uri = st.secrets["azure"]["redirect_uri"]
+        elif os.getenv("STREAMLIT_SERVER_PORT"): 
+             # Fallback para ambiente local se não definido
+             port = os.getenv("STREAMLIT_SERVER_PORT")
+             redirect_uri = f"http://localhost:{port}/"
+        else:
+             # Fallback para cloud se não achar nada
+             redirect_uri = "https://painel-de-relatorios.streamlit.app/"
+
         # Gera URL direto e mostra botão único
         auth_url = auth_service.get_auth_url(redirect_uri)
         
@@ -95,7 +105,16 @@ def check_authentication():
     if "code" in query_params:
         code = query_params["code"]
         auth_service = AuthService()
-        redirect_uri = "https://painel-de-relatorios.streamlit.app/" # Atualizado para a porta mais recente
+        auth_service = AuthService()
+        
+        # Mesma lógica para garantir consistência
+        if "redirect_uri" in st.secrets["azure"]:
+             redirect_uri = st.secrets["azure"]["redirect_uri"]
+        elif os.getenv("STREAMLIT_SERVER_PORT"): 
+             port = os.getenv("STREAMLIT_SERVER_PORT")
+             redirect_uri = f"http://localhost:{port}/"
+        else:
+             redirect_uri = "https://painel-de-relatorios.streamlit.app/"
         
         try:
             token_result = auth_service.get_token_from_code(code, redirect_uri)

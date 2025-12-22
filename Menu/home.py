@@ -4,6 +4,7 @@ def render_home_menu():
     """Renderiza o Menu Principal com opções de relatórios."""
     
 from Menu.permissions import ADMIN_EMAIL
+from Menu.logging_service import log_access
 
 def render_home_menu():
     """Renderiza o Menu Principal com opções de relatórios."""
@@ -52,6 +53,9 @@ def render_home_menu():
             st.markdown("### 📦 Estoque em Tempo Real")
             st.markdown("Visão geral em tempo real, status de ocupação e produtos.")
             if st.button("Acessar Relatório", key="btn_estoque", type="primary", use_container_width=True):
+                # Log Access
+                log_access("Estoque em Tempo Real", user_email, user_name)
+                
                 st.session_state['current_page'] = "stock"
                 st.rerun()
 

@@ -169,8 +169,7 @@ def inject_styles():
             section[data-testid="stSidebar"] .stTextInput > div > div {{
                 border-radius: 8px;
             }}
-        </style>
-        
+            
             /* 3. CLASSE FORÇADA VIA JS (Detected Light) */
             body.detected-light .logo-adaptive,
             .detected-light .logo-adaptive {{

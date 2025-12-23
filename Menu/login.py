@@ -98,40 +98,8 @@ def check_authentication():
     # 2. Se voltou do Azure com um código na URL
     query_params = st.query_params
     if "code" in query_params:
-        code = query_params["code"]
+        st.info(f"DEBUG: CÓDIGO RECEBIDO DE AZURE! {query_params['code']}")
+        st.warning("Se você está lendo isso, o loop parou AQUI.")
+        st.stop()
         
-        try:
-            from Menu.auth import AuthService, get_redirect_uri
-        except ImportError:
-             from .auth import AuthService, get_redirect_uri
-             
-        auth_service = AuthService()
-        redirect_uri = get_redirect_uri()
-        
-        try:
-            token_result = auth_service.get_token_from_code(code, redirect_uri)
-            if "access_token" in token_result:
-                st.session_state["authenticated"] = True
-                st.session_state["user_info"] = token_result.get("id_token_claims", {})
-                st.session_state["access_token"] = token_result["access_token"]
-                
-                # LEITURA DE TOKEN SUCESSO
-                # Comentando limpeza de URL para teste de loop
-                # st.query_params.clear()
-                
-                # EM VEZ DE RERUN, Vamos parar e pedir confirmação.
-                # Isso evita o loop infinito se houver algum redirecionamento automático
-                st.success("Login realizado com sucesso!")
-                if st.button("🚀 Clique aqui para acessar o sistema"):
-                    st.rerun()
-                
-                # Retorna True para que o resto do script não renderize o login novamente na mesma passada (se possível)
-                # Mas sem rerun, ele vai continuar a execução do script.
-                return True
-            else:
-                st.error(f"Erro de Autenticação: {token_result.get('error_description')}")
-                st.write(f"Debug: Esperava redirect_uri={redirect_uri}")
-        except Exception as e:
-            st.error(f"Ocorreu um erro durante o login: {str(e)}")
-            
     return False

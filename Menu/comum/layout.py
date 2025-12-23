@@ -51,6 +51,10 @@ def get_adaptive_logo_svg(width="100%", height="auto"):
     if not b64_light: b64_light = b64_dark
     if not b64_dark: b64_dark = b64_light
 
+    # Validar unidades para CSS (adicionar px se for apenas número)
+    if str(width).isdigit(): width = f"{width}px"
+    if str(height).isdigit(): height = f"{height}px"
+
     # CSS Background Image approach (More robust)
     html = f"""
 <style>

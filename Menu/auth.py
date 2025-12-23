@@ -16,8 +16,8 @@ REDIRECT_PATH = "/"  # A aplicação roda na raiz
 # Ex: http://localhost:8507/
 #
 def get_redirect_uri():
-    # FORÇANDO URL DE PRODUÇÃO PARA TESTE (SEM BARRA FINAL - TENTATIVA DE FIX DO LOOP)
-    return "https://painel-de-relatorios.streamlit.app"
+    # FORÇANDO URL DE PRODUÇÃO PARA TESTE (COM BARRA FINAL - MATCH COM AZURE)
+    return "https://painel-de-relatorios.streamlit.app/"
 
 SCOPE = ["User.Read"]
 

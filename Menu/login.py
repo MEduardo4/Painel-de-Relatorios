@@ -18,7 +18,8 @@ def render_login():
         <style>
             .login-subtext {
                 font-size: 14px;
-                color: #94A3B8;
+                color: var(--text-color);
+                opacity: 0.7;
                 margin-bottom: 20px;
             }
             .login-button {

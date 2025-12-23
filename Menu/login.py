@@ -22,9 +22,12 @@ def render_login():
                 margin-bottom: 20px;
             }
             .login-button {
+                display: block;
                 width: 100%;
                 background-color: #EF4444;
-                color: #FFFFFF;
+                color: #FFFFFF !important;
+                text-decoration: none;
+                text-align: center;
                 border: none;
                 padding: 12px;
                 border-radius: 8px;
@@ -36,15 +39,16 @@ def render_login():
             }
             .login-button:hover {
                 background-color: #DC2626;
+                text-decoration: none;
+            }
+            .login-button:visited {
+                color: #FFFFFF !important;
             }
         </style>
     """, unsafe_allow_html=True)
 
     # ... (código intermediário omitido, mantendo o fluxo)
-
-    # Dentro do render_login, mas precisamos atualizar o CSS block lá em cima primeiro. 
-    # Vou reescrever o bloco CSS inicial e o botão final.
-
+    # Se certifique de manter o fluxo
 
     # Layout Centralizado
     col_left, col_center, col_right = st.columns([1, 1.2, 1])
@@ -80,11 +84,12 @@ def render_login():
         auth_url = auth_service.get_auth_url(redirect_uri)
         
         st.markdown(f"""
-            <a href="{auth_url}" target="_top" style="text-decoration: none;">
-                <button class="login-button">
-                    🔐 Entrar com Microsoft
-                </button>
+            <a href="{auth_url}" target="_top" class="login-button">
+                🔐 Entrar com Microsoft
             </a>
+            <div style="text-align: center; margin-top: 10px;">
+                <a href="{auth_url}" target="_top" style="color: #94A3B8; font-size: 12px;">(Link direto alternativo)</a>
+            </div>
         """, unsafe_allow_html=True)
         
         st.write("")

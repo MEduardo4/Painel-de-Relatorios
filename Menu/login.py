@@ -83,20 +83,17 @@ def render_login():
         # Gera URL direto e mostra botão único
         auth_url = auth_service.get_auth_url(redirect_uri)
         
-        st.markdown(f"""
-            <a href="{auth_url}" target="_top" class="login-button">
-                🔐 Entrar com Microsoft
-            </a>
-            <div style="text-align: center; margin-top: 10px;">
-                <a href="{auth_url}" target="_top" style="color: #94A3B8; font-size: 12px;">(Link direto alternativo)</a>
-            </div>
-        """, unsafe_allow_html=True)
-        
-        # DEBUG DE SOBREVIVÊNCIA: Se o botão falhar, o link cru funciona
-        st.write("---")
-        st.warning("Se o botão acima não funcionar, clique no link abaixo:")
-        st.write(f"Link Bruto: {auth_url}")
-        st.write("---")
+        if auth_url:
+            st.link_button("🔐 Entrar com Microsoft", auth_url, type="primary", use_container_width=True)
+            
+            # Link alternativo discreto
+            st.markdown(f"<p style='text-align: center; font-size: 12px; color: #94A3B8;'><a href='{auth_url}' target='_top' style='color: #94A3B8;'>Link alternativo direto</a></p>", unsafe_allow_html=True)
+        else:
+            st.error("Erro interno: Falha ao gerar link de autenticação.")
+            st.stop()
+            
+        # DEBUG DE SOBREVIVÊNCIA (Manter por enquanto se o usuário pedir)
+        # st.write(f"Link Bruto: {auth_url}")
 
 def check_authentication():
     """

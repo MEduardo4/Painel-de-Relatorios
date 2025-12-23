@@ -145,4 +145,8 @@ def check_authentication():
         except Exception as e:
             st.error(f"Ocorreu um erro durante o login: {str(e)}")
             
+    # Se chegou aqui é porque não autenticou
+    if "code" in query_params and not st.session_state.get("authenticated", False):
+         st.warning("⚠️ O sistema detectou um retorno do login, mas a sessão não foi persistida. Isso pode indicar bloqueio de Cookies ou problema de configuração no Streamlit Cloud.")
+         
     return False

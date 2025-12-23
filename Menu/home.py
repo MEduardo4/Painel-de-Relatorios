@@ -1,8 +1,5 @@
 import streamlit as st
 
-def render_home_menu():
-    """Renderiza o Menu Principal com opções de relatórios."""
-    
 try:
     from Menu.permissions import ADMIN_EMAIL
     from Menu.logging_service import log_access

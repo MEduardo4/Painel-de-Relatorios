@@ -98,6 +98,44 @@ def inject_styles():
                 font-size: 12px;
                 border: 1px solid var(--background-color);
             }
+
+            /* --- LOGO ADAPTÁVEL (Global) --- */
+            
+            /* Transição Suave */
+            .logo-dark, .logo-light, .sidebar-logo-dark, .sidebar-logo-light {
+                transition: opacity 0.3s ease;
+            }
+
+            /* PADRÃO (DARK MODE) */
+            .logo-dark, .sidebar-logo-dark { display: block !important; }
+            .logo-light, .sidebar-logo-light { display: none !important; }
+
+            /* LIGHT MODE (Detectado via atributo data-theme no HTML/Body/App) */
+            /* Streamlit aplica data-theme="light" em elementos raiz */
+            
+            [data-theme="light"] .logo-dark,
+            [data-theme="light"] .sidebar-logo-dark,
+            section[data-theme="light"] .logo-dark,
+            section[data-theme="light"] .sidebar-logo-dark {
+                display: none !important;
+            }
+
+            [data-theme="light"] .logo-light,
+            [data-theme="light"] .sidebar-logo-light,
+            section[data-theme="light"] .logo-light,
+            section[data-theme="light"] .sidebar-logo-light {
+                display: block !important;
+            }
+
+            /* FALLBACK DO SISTEMA (OS) */
+            @media (prefers-color-scheme: light) {
+                /* Se não houver override do Streamlit (data-theme), usa o sistema */
+                html:not([data-theme="dark"]) .logo-dark,
+                html:not([data-theme="dark"]) .sidebar-logo-dark { display: none !important; }
+                
+                html:not([data-theme="dark"]) .logo-light,
+                html:not([data-theme="dark"]) .sidebar-logo-light { display: block !important; }
+            }
         </style>
         """,
         unsafe_allow_html=True,

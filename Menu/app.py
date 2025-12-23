@@ -7,6 +7,8 @@ from comum.layout import setup_page
 def main():
     # 0. Configura página primeiro
     setup_page()
+    from comum.layout import inject_styles
+    inject_styles()
 
     # 1. Ajusta PATH para importar projetos vizinhos
     import sys
@@ -65,31 +67,7 @@ def main():
                 
                 if not b64_l: b64_l = b64_d
 
-                # CSS Lateral (Inline para garantir escopo)
-                st.markdown("""
-                <style>
-                    /* Sidebar Logo Toggle */
-                    .sidebar-logo-dark { display: block !important; margin-bottom: 20px; width: 100%; }
-                    .sidebar-logo-light { display: none !important; margin-bottom: 20px; width: 100%; }
-
-                    [data-theme="light"] .sidebar-logo-dark,
-                    section[data-theme="light"] .sidebar-logo-dark,
-                    div[data-theme="light"] .sidebar-logo-dark {
-                         display: none !important; 
-                    }
-                    
-                    [data-theme="light"] .sidebar-logo-light,
-                    section[data-theme="light"] .sidebar-logo-light,
-                    div[data-theme="light"] .sidebar-logo-light {
-                         display: block !important; 
-                    }
-                    
-                    @media (prefers-color-scheme: light) {
-                         .sidebar-logo-dark { display: none !important; }
-                         .sidebar-logo-light { display: block !important; }
-                    }
-                </style>
-                """, unsafe_allow_html=True)
+                # CSS agora está global em layout.py (inject_styles)
                 
                 st.markdown(
                     f"""

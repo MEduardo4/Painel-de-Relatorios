@@ -75,42 +75,10 @@ def render_login():
                 # Fallback se não achar o claro: usa o escuro mesmo
                 b64_light = b64_dark
 
-            # CSS para troca automática
-            st.markdown("""
-            <style>
-                /* CLASSE BASE */
-                .logo-dark, .logo-light {
-                    transition: opacity 0.3s ease;
-                }
-
-                /* PADRÃO (DARK MODE) */
-                .logo-dark { display: block !important; }
-                .logo-light { display: none !important; }
-
-                /* LIGHT MODE (Detectado via atributo do 'body' ou 'section') */
-                /* Streamlit injeta 'data-theme' no pai. Usamos :has() ou cascata */
-                
-                [data-theme="light"] .logo-dark,
-                section[data-theme="light"] .logo-dark,
-                div[data-theme="light"] .logo-dark {
-                    display: none !important;
-                }
-
-                [data-theme="light"] .logo-light,
-                section[data-theme="light"] .logo-light,
-                div[data-theme="light"] .logo-light {
-                    display: block !important;
-                }
-
-                /* FALLBACK DO SISTEMA (OS) */
-                @media (prefers-color-scheme: light) {
-                    .logo-dark { display: none !important; }
-                    .logo-light { display: block !important; }
-                }
-            </style>
-            """, unsafe_allow_html=True)
-
             # HTML com as duas imagens sobrepostas (uma visível, outra oculta)
+            # O CSS que controla a exibição (.logo-dark / .logo-light) está em Menu/comum/layout.py
+            # e é injetado pelo app.py no início.
+            
             st.markdown(
                 f"<div style='display: flex; justify-content: center; margin-bottom: 20px;'>"
                 f"<img src='data:image/png;base64,{b64_dark}' width='500' class='logo-dark'>"

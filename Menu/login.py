@@ -85,9 +85,6 @@ def render_login():
         
         if auth_url:
             st.link_button("🔐 Entrar com Microsoft", auth_url, type="primary", use_container_width=True)
-            
-            # Link alternativo discreto
-            st.markdown(f"<p style='text-align: center; font-size: 12px; color: #94A3B8;'><a href='{auth_url}' target='_top' style='color: #94A3B8;'>Link alternativo direto</a></p>", unsafe_allow_html=True)
         else:
             st.error("Erro interno: Falha ao gerar link de autenticação.")
             st.stop()

@@ -171,35 +171,70 @@ def inject_styles():
             }}
         </style>
         
+            /* 3. CLASSE FORÇADA VIA JS (Detected Light) */
+            body.detected-light .logo-adaptive,
+            .detected-light .logo-adaptive {{
+                background-image: var(--img-logo-light) !important;
+            }}
+        </style>
+        
         <script>
-            // SCRIPT SENSOR DE TEMA
-            // Detecta a cor real do fundo e marca o body com uma classe "detected-light"
-            function detectTheme() {{
-                const body = window.parent.document.body || document.body;
-                const style = window.getComputedStyle(body);
-                const bg = style.backgroundColor;
+            // SCRIPT SENSOR DE TEMA (BASEADO EM VARIÁVEIS DO STREAMLIT)
+            // O Streamlit injeta a variável --text-color no Iframe.
+            // Se o texto for escuro (#31333F ou preto), o fundo é claro (Light Mode).
+            // Se o texto for claro (branco), o fundo é escuro (Dark Mode).
+            
+            function detectStreamlitTheme() {{
+                const body = document.body;
+                // Pega o valor computado da variável CSS --text-color
+                const style = getComputedStyle(body);
+                // Tenta pegar --text-color (padrão streamlit) ou fallback para color
+                let textColor = style.getPropertyValue('--text-color').trim();
                 
-                // Verifica se é branco ou muito claro
-                // rgb(255, 255, 255) ou rgba(255, 255, 255, 1)
-                const isLight = bg.includes('255, 255, 255') || bg === 'white' || bg === '#ffffff';
+                // Se não encontrar a variável (raro), pega a cor computada do corpo
+                if (!textColor) {{
+                    textColor = style.color;
+                }}
                 
-                // Tambem verifica data-theme
-                const attrTheme = body.getAttribute('data-theme');
-                const isLightTheme = attrTheme === 'light';
+                // Função auxiliar para saber se a cor é escura (brightness)
+                function isColorDark(colorString) {{
+                    // Converte cores nomeadas ou hex para RGB se necessário (simplificado)
+                    // Streamlit geralmente retorna hex (#31333F) ou rgb.
+                    
+                    if (colorString.startsWith('#')) {{
+                        const hex = colorString.substring(1);
+                        const r = parseInt(hex.substr(0, 2), 16);
+                        const g = parseInt(hex.substr(2, 2), 16);
+                        const b = parseInt(hex.substr(4, 2), 16);
+                        // Fórmula de brilho (YIQ)
+                        return ((r * 299) + (g * 587) + (b * 114)) / 1000 < 128;
+                    }} else if (colorString.startsWith('rgb')) {{
+                        const rgb = colorString.match(/\d+/g);
+                        if(rgb) {{
+                            const r = parseInt(rgb[0]);
+                            const g = parseInt(rgb[1]);
+                            const b = parseInt(rgb[2]);
+                            return ((r * 299) + (g * 587) + (b * 114)) / 1000 < 128;
+                        }}
+                    }}
+                    return true; // Default assume escuro se falhar
+                }}
                 
-                if (isLight || isLightTheme) {{
+                const textIsDark = isColorDark(textColor);
+                
+                // LÓGICA: Se o texto é escuro, o TEMA É CLARO.
+                if (textIsDark) {{
                     document.body.classList.add('detected-light');
-                    try {{ window.parent.document.body.classList.add('detected-light'); }} catch(e){{}}
+                    // Tenta propagar se possível, mas o local é o que importa para o CSS
                 }} else {{
                     document.body.classList.remove('detected-light');
-                    try {{ window.parent.document.body.classList.remove('detected-light'); }} catch(e){{}}
                 }}
             }}
             
             // Roda imediatamente
-            detectTheme();
-            // Roda a cada segundo para garantir
-            setInterval(detectTheme, 1000);
+            detectStreamlitTheme();
+            // Roda periodicamente (para pegar a troca feita no menu Settings)
+            setInterval(detectStreamlitTheme, 1000);
         </script>
         """,
         unsafe_allow_html=True,

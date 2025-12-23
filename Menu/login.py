@@ -1,9 +1,9 @@
 import streamlit as st
 import os
 try:
-    from Menu.auth import AuthService
+    from Menu.auth import AuthService, get_redirect_uri
 except ImportError:
-    from .auth import AuthService
+    from .auth import AuthService, get_redirect_uri
 import base64
 
 def get_base64_image(image_path):
@@ -54,11 +54,6 @@ def render_login():
         st.markdown("<p style='text-align: center;' class='login-subtext'>Entre com sua conta corporativa para acessar</p>", unsafe_allow_html=True)
 
         # Lógica de Autenticação
-        try:
-            from Menu.auth import AuthService, get_redirect_uri
-        except ImportError:
-             from .auth import AuthService, get_redirect_uri
-             
         auth_service = AuthService()
         redirect_uri = get_redirect_uri()
         

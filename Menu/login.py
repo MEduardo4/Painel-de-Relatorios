@@ -133,12 +133,25 @@ def check_authentication():
                 st.session_state["user_info"] = token_result.get("id_token_claims", {})
                 st.session_state["access_token"] = token_result["access_token"]
                 
-                # Limpa o código da URL para ficar limpo
-                st.query_params.clear()
-                # st.rerun() <- Removido para evitar perda de sessão
+                # st.query_params.clear() <-- Comentado para debug visual
+                
+                st.success("✅ Login Autorizado pela Microsoft!")
+                st.info("Token recebido com sucesso. Sessão iniciada.")
+                
+                # Botão Manual para garantir que o usuário veja o sucesso antes do redirect
+                if st.button(">> CLIQUE AQUI PARA ENTRAR NO SISTEMA <<", type="primary"):
+                    st.query_params.clear()
+                    st.rerun()
+                
+                # Stop para não carregar o resto da página misturado
+                st.stop()
                 return True
             else:
-                st.error(f"Erro de Autenticação: {token_result.get('error_description')}")
+                st.error(f"❌ Erro na troca de token: {token_result.get('error_description')}")
+                st.write(f"Detalhes: {token_result}")
+        except Exception as e:
+            st.error(f"❌ Exceção no login: {str(e)}")
+            st.write(f"Erro detalhado: {e}")
         except Exception as e:
             st.error(f"Ocorreu um erro durante o login: {str(e)}")
             

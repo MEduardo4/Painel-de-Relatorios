@@ -31,6 +31,7 @@ def render_header():
 
 def inject_styles():
     st.markdown(
+        """
         <style>
             :root {
                 /* Usar variáveis do Streamlit para adaptação */

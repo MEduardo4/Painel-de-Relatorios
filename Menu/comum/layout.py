@@ -99,7 +99,8 @@ def inject_styles():
                 display: block !important;
             }
             
-            /* ------------------------------------------------ */     /* --- ESTILOS GERAIS (Recuperados) --- */
+            /* ------------------------------------------------ */
+            /* --- ESTILOS GERAIS (Recuperados) --- */
             .yellow-header {
                 background-color: #FACC15;
                 color: #0F172A;
@@ -110,63 +111,63 @@ def inject_styles():
                 margin-bottom: -5px;
                 border: 1px solid var(--background-color);
                 border-bottom: none;
-            }}
+            }
             
-            .kpi-card {{
+            .kpi-card {
                 background: var(--card-bg);
                 border: 1px solid var(--card-border);
                 border-radius: 12px;
                 padding: 12px 14px;
                 box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-            }}
+            }
             
-            .kpi-label {{
+            .kpi-label {
                 color: var(--text-color);
                 font-size: 12px;
                 margin-bottom: 4px;
                 letter-spacing: 0.3px;
                 opacity: 0.8;
-            }}
+            }
             
-            .kpi-value {{
+            .kpi-value {
                 color: var(--primary-color);
                 font-size: 22px;
                 font-weight: 700;
-            }}
+            }
             
-            .kpi-sub {{
+            .kpi-sub {
                 color: var(--text-color);
                 font-size: 12px;
                 opacity: 0.6;
-            }}
+            }
             
-            .toolbar {{
+            .toolbar {
                 display: flex;
                 gap: 8px;
                 align-items: center;
                 justify-content: flex-end;
                 margin-bottom: 10px;
-            }}
+            }
             
-            .toolbar-badge {{
+            .toolbar-badge {
                 background: var(--secondary-background-color);
                 color: var(--text-color);
                 padding: 6px 10px;
                 border-radius: 999px;
                 font-size: 12px;
                 border: 1px solid var(--background-color);
-            }}
+            }
 
             /* Sidebar Input Fix */
-            section[data-testid="stSidebar"] .stTextInput > div > div {{
+            section[data-testid="stSidebar"] .stTextInput > div > div {
                 border-radius: 8px;
-            }}
+            }
             
             /* 3. CLASSE FORÇADA VIA JS (Detected Light) */
             body.detected-light .logo-adaptive,
-            .detected-light .logo-adaptive {{
+            .detected-light .logo-adaptive {
                 background-image: var(--img-logo-light) !important;
-            }}
+            }
         </style>
         
         <script>
@@ -175,7 +176,7 @@ def inject_styles():
             // Se o texto for escuro (#31333F ou preto), o fundo é claro (Light Mode).
             // Se o texto for claro (branco), o fundo é escuro (Dark Mode).
             
-            function detectStreamlitTheme() {{
+            function detectStreamlitTheme() {
                 const body = document.body;
                 // Pega o valor computado da variável CSS --text-color
                 const style = getComputedStyle(body);
@@ -183,44 +184,50 @@ def inject_styles():
                 let textColor = style.getPropertyValue('--text-color').trim();
                 
                 // Se não encontrar a variável (raro), pega a cor computada do corpo
-                if (!textColor) {{
+                if (!textColor) {
                     textColor = style.color;
-                }}
+                }
                 
                 // Função auxiliar para saber se a cor é escura (brightness)
-                function isColorDark(colorString) {{
+                function isColorDark(colorString) {
                     // Converte cores nomeadas ou hex para RGB se necessário (simplificado)
                     // Streamlit geralmente retorna hex (#31333F) ou rgb.
                     
-                    if (colorString.startsWith('#')) {{
+                    if (colorString.startsWith('#')) {
                         const hex = colorString.substring(1);
                         const r = parseInt(hex.substr(0, 2), 16);
                         const g = parseInt(hex.substr(2, 2), 16);
                         const b = parseInt(hex.substr(4, 2), 16);
                         // Fórmula de brilho (YIQ)
                         return ((r * 299) + (g * 587) + (b * 114)) / 1000 < 128;
-                    }} else if (colorString.startsWith('rgb')) {{
+                    } else if (colorString.startsWith('rgb')) {
                         const rgb = colorString.match(/\d+/g);
-                        if(rgb) {{
+                        if(rgb) {
                             const r = parseInt(rgb[0]);
                             const g = parseInt(rgb[1]);
                             const b = parseInt(rgb[2]);
                             return ((r * 299) + (g * 587) + (b * 114)) / 1000 < 128;
-                        }}
-                    }}
+                        }
+                    }
                     return true; // Default assume escuro se falhar
-                }}
+                }
                 
                 const textIsDark = isColorDark(textColor);
+                console.log("Theme Sensor: Text Color =", textColor, "Is Dark? =", textIsDark, "-> Mode:", textIsDark ? "LIGHT" : "DARK");
                 
                 // LÓGICA: Se o texto é escuro, o TEMA É CLARO.
-                if (textIsDark) {{
-                    document.body.classList.add('detected-light');
-                    // Tenta propagar se possível, mas o local é o que importa para o CSS
-                }} else {{
-                    document.body.classList.remove('detected-light');
-                }}
-            }}
+                if (textIsDark) {
+                    if (!body.classList.contains('detected-light')) {
+                        console.log("Adding detected-light class");
+                        body.classList.add('detected-light');
+                    }
+                } else {
+                    if (body.classList.contains('detected-light')) {
+                        console.log("Removing detected-light class");
+                        body.classList.remove('detected-light');
+                    }
+                }
+            }
             
             // Roda imediatamente
             detectStreamlitTheme();

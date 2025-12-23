@@ -73,7 +73,7 @@ def render_login():
             img_path = os.path.join(os.path.dirname(__file__), "images", "Logo_BRG.png")
             st.image(img_path, width=600)
 
-        st.markdown("<h3 style='text-align: center; color: #F8FAFC;'>Painel de Relatórios</h3>", unsafe_allow_html=True)
+        st.markdown("<h3 style='text-align: center; color: var(--text-color);'>Painel de Relatórios</h3>", unsafe_allow_html=True)
         st.markdown("<p style='text-align: center;' class='login-subtext'>Entre com sua conta corporativa para acessar</p>", unsafe_allow_html=True)
 
         # Lógica de Autenticação

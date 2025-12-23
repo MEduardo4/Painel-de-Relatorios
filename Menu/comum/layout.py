@@ -52,25 +52,23 @@ def get_adaptive_logo_svg(width="100%", height="auto"):
     if not b64_dark: b64_dark = b64_light
 
     # SVG Inline com CSS interno para preencher e trocar
-    svg = f"""
-    <svg width="{width}" height="{height}" viewBox="0 0 500 150" xmlns="http://www.w3.org/2000/svg" class="adaptive-svg-logo">
-        <style>
-            /* Padrão para SVG */
-            .logo-img-dark {{ display: block; }}
-            .logo-img-light {{ display: none; }}
-            
-            /* Detecção de Sistema Operacional */
-            @media (prefers-color-scheme: light) {{
-                .logo-img-dark {{ display: none; }}
-                .logo-img-light {{ display: block; }}
-            }}
-        </style>
-        <!-- Imagem Escura (Default) -->
-        <image href="data:image/png;base64,{b64_dark}" width="500" height="150" class="logo-img-dark" />
-        <!-- Imagem Clara -->
-        <image href="data:image/png;base64,{b64_light}" width="500" height="150" class="logo-img-light" />
-    </svg>
-    """
+    svg = f"""<svg width="{width}" height="{height}" viewBox="0 0 500 150" xmlns="http://www.w3.org/2000/svg" class="adaptive-svg-logo">
+    <style>
+        /* Padrão para SVG */
+        .logo-img-dark {{ display: block; }}
+        .logo-img-light {{ display: none; }}
+        
+        /* Detecção de Sistema Operacional */
+        @media (prefers-color-scheme: light) {{
+            .logo-img-dark {{ display: none; }}
+            .logo-img-light {{ display: block; }}
+        }}
+    </style>
+    <!-- Imagem Escura (Default) -->
+    <image href="data:image/png;base64,{b64_dark}" width="500" height="150" class="logo-img-dark" />
+    <!-- Imagem Clara -->
+    <image href="data:image/png;base64,{b64_light}" width="500" height="150" class="logo-img-light" />
+</svg>"""
     return svg
 
 def inject_styles():

@@ -39,9 +39,13 @@ def get_adaptive_logo_svg(width="100%", height="auto"):
             current_dir = os.path.dirname(os.path.abspath(__file__)) 
             menu_dir = os.path.dirname(current_dir) 
             img_path = os.path.join(menu_dir, "images", filename)
+            # print(f"DEBUG: Tenting load image from: {img_path}")
             with open(img_path, "rb") as f:
-                return base64.b64encode(f.read()).decode()
-        except:
+                data = base64.b64encode(f.read()).decode()
+                # print(f"DEBUG: Loaded {len(data)} bytes for {filename}")
+                return data
+        except Exception as e:
+            print(f"DEBUG ERROR loading {filename}: {e}")
             return ""
 
     b64_dark = get_b64("Logo_BRG.png")
@@ -52,7 +56,7 @@ def get_adaptive_logo_svg(width="100%", height="auto"):
     if not b64_dark: b64_dark = b64_light
 
     # SVG Inline com CSS interno para preencher e trocar
-    svg = f"""<svg width="{width}" height="{height}" viewBox="0 0 500 150" xmlns="http://www.w3.org/2000/svg" class="adaptive-svg-logo">
+    svg = f"""<svg width="{width}" height="{height}" viewBox="0 0 500 150" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" class="adaptive-svg-logo">
     <style>
         /* Padrão para SVG */
         .logo-img-dark {{ display: block; }}
@@ -65,9 +69,9 @@ def get_adaptive_logo_svg(width="100%", height="auto"):
         }}
     </style>
     <!-- Imagem Escura (Default) -->
-    <image href="data:image/png;base64,{b64_dark}" width="500" height="150" class="logo-img-dark" />
+    <image href="data:image/png;base64,{b64_dark}" xlink:href="data:image/png;base64,{b64_dark}" width="500" height="150" class="logo-img-dark" />
     <!-- Imagem Clara -->
-    <image href="data:image/png;base64,{b64_light}" width="500" height="150" class="logo-img-light" />
+    <image href="data:image/png;base64,{b64_light}" xlink:href="data:image/png;base64,{b64_light}" width="500" height="150" class="logo-img-light" />
 </svg>"""
     return svg
 

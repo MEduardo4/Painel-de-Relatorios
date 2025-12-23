@@ -21,8 +21,30 @@ def render_login():
                 color: #94A3B8;
                 margin-bottom: 20px;
             }
+            .login-button {
+                width: 100%;
+                background-color: #EF4444;
+                color: #FFFFFF;
+                border: none;
+                padding: 12px;
+                border-radius: 8px;
+                font-size: 16px;
+                font-weight: bold;
+                cursor: pointer;
+                margin-top: 10px;
+                transition: background-color 0.3s;
+            }
+            .login-button:hover {
+                background-color: #DC2626;
+            }
         </style>
     """, unsafe_allow_html=True)
+
+    # ... (código intermediário omitido, mantendo o fluxo)
+
+    # Dentro do render_login, mas precisamos atualizar o CSS block lá em cima primeiro. 
+    # Vou reescrever o bloco CSS inicial e o botão final.
+
 
     # Layout Centralizado
     col_left, col_center, col_right = st.columns([1, 1.2, 1])
@@ -68,19 +90,7 @@ def render_login():
         
         st.markdown(f"""
             <a href="{auth_url}" target="_self" style="text-decoration: none;">
-                <button style="
-                    width: 100%;
-                    background-color: #EF4444;
-                    color: #FFFFFF;
-                    border: none;
-                    padding: 12px;
-                    border-radius: 8px;
-                    font-size: 16px;
-                    font-weight: bold;
-                    cursor: pointer;
-                    margin-top: 10px;
-                    transition: background-color 0.3s;
-                " onmouseover="this.style.backgroundColor='#DC2626'" onmouseout="this.style.backgroundColor='#EF4444'">
+                <button class="login-button">
                     🔐 Entrar com Microsoft
                 </button>
             </a>

@@ -50,9 +50,6 @@ def render_login():
     col_left, col_center, col_right = st.columns([1, 1.2, 1])
 
     with col_center:
-        st.error("⚠️ VERSÃO DEBUG: 99.1 - CHECANDO DEPLOY ⚠️")
-        st.write(f"URI esperada: {get_redirect_uri()}")
-        
         # Espaçamento vertical
         st.write("")
         st.write("")
@@ -81,12 +78,6 @@ def render_login():
         
         # Gera URL direto e mostra botão único
         auth_url = auth_service.get_auth_url(redirect_uri)
-        
-        # DEBUG: MOSTRAR URL GERADA
-        st.write("--- DEBUG INFO ---")
-        st.write(f"**Redirect URI usada:** `{redirect_uri}`")
-        st.text_area("URL de Autenticação gerada (Copie e tente no navegador se o botão falhar):", auth_url, height=100)
-        st.write("------------------")
         
         st.markdown(f"""
             <a href="{auth_url}" target="_top" style="text-decoration: none;">
@@ -122,8 +113,28 @@ def check_authentication():
              code = val
 
     if code:
-        st.info(f"DEBUG: CÓDIGO RECEBIDO DE AZURE! {code}")
-        st.warning("Se você está lendo isso, o loop parou AQUI.")
-        st.stop()
+        try:
+            from Menu.auth import AuthService, get_redirect_uri
+        except ImportError:
+             from .auth import AuthService, get_redirect_uri
+             
+        auth_service = AuthService()
+        redirect_uri = get_redirect_uri()
         
+        try:
+            token_result = auth_service.get_token_from_code(code, redirect_uri)
+            if "access_token" in token_result:
+                st.session_state["authenticated"] = True
+                st.session_state["user_info"] = token_result.get("id_token_claims", {})
+                st.session_state["access_token"] = token_result["access_token"]
+                
+                # Limpa o código da URL para ficar limpo
+                st.query_params.clear()
+                st.rerun()
+                return True
+            else:
+                st.error(f"Erro de Autenticação: {token_result.get('error_description')}")
+        except Exception as e:
+            st.error(f"Ocorreu um erro durante o login: {str(e)}")
+            
     return False

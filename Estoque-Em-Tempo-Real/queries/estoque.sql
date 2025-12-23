@@ -6,7 +6,7 @@ SELECT M0_FILIAL AS Filial,
     CASE
         WHEN B1_MSBLQL = 1 THEN '1 - Sim'
         WHEN B1_MSBLQL = 2 THEN '2 - Não'
-        ELSE ' '
+        ELSE ' - '
     END AS Bloq,
     CONCAT(B2_LOCAL, '-', NNR_DESCRI) AS DescArmazem,
     B2_LOCAL AS Armazem,

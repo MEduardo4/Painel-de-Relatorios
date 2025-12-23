@@ -30,19 +30,84 @@ def render_header():
 
 
 def inject_styles():
+    # 1. Carrega imagens em Base64 para CSS
+    import os
+    import base64
+
+    def get_b64(filename):
+        try:
+            # Caminho relativo: layout.py está em Menu/comum/ -> subir para Menu/images
+            # Menu/comum/../../Menu/images (segurança: usar abspath)
+            current_dir = os.path.dirname(os.path.abspath(__file__)) # Menu/comum
+            menu_dir = os.path.dirname(current_dir) # Menu
+            img_path = os.path.join(menu_dir, "images", filename)
+            
+            with open(img_path, "rb") as f:
+                return base64.b64encode(f.read()).decode()
+        except Exception as e:
+            # print(f"Erro ao carregar imagem {filename}: {e}")
+            return ""
+
+    b64_dark = get_b64("Logo_BRG.png")
+    b64_light = get_b64("Logo_BRGTemaClaro.png")
+    
+    # Se não tiver a clara, usa a escura
+    if not b64_light: b64_light = b64_dark
+    if not b64_dark: b64_dark = b64_light # Vice versa para garantir
+
+    # 2. Injeta CSS com Variáveis CSS para imagens
     st.markdown(
-        """
+        f"""
         <style>
-            :root {
-                /* Usar variáveis do Streamlit para adaptação */
+            :root {{
+                /* Configuração de Cores do Tema */
                 --card-bg: var(--secondary-background-color);
                 --card-border: var(--background-color);
-            }
+                
+                /* Imagens convertidas para variaveis (Payload) */
+                --img-logo-dark: url('data:image/png;base64,{b64_dark}');
+                --img-logo-light: url('data:image/png;base64,{b64_light}');
+            }}
             
-            /* Melhoria visual nos inputs da Sidebar (sem forçar cor preta) */
-            /* Removido para garantir compatibilidade total com temas */
+               /* --- LOGO ADAPTÁVEL (Global) --- */
             
-            .yellow-header {
+            /* 1. Definição via Variáveis para facilitar */
+            .logo-adaptive {{
+                display: block;
+                background-size: contain;
+                background-repeat: no-repeat;
+                background-position: center;
+                /* Padrão: Imagem Escura (para fundo escuro) - Texto Branco */
+                background-image: var(--img-logo-dark);
+                transition: background-image 0.2s ease-in-out;
+            }}
+
+            /* 2. REGRAS PARA MODO CLARO (LIGHT MODE) */
+            /* Quando o fundo é branco, queremos a Imagem Clara (Texto Escuro) */
+            
+            /* Caso 1: Atributo data-theme na tag HTML ou BODY */
+            html[data-theme="light"] .logo-adaptive,
+            body[data-theme="light"] .logo-adaptive,
+            /* Caso 2: Atributo no App Container (div principal do Streamlit) */
+            [data-testid="stApp"][data-theme="light"] .logo-adaptive,
+            /* Caso 3: Section main */
+            section[data-testid="stMain"][data-theme="light"] .logo-adaptive,
+            /* Caso 4: Qualquer pai com data-theme light */
+            [data-theme="light"] .logo-adaptive {{
+                background-image: var(--img-logo-light) !important;
+            }}
+
+            /* Caso 5: Preferência do Sistema (OS Light Mode) */
+            /* Apenas se NÃO estiver forçado para dark no HTML */
+            @media (prefers-color-scheme: light) {{
+                html:not([data-theme="dark"]) .logo-adaptive,
+                body:not([data-theme="dark"]) .logo-adaptive,
+                [data-testid="stApp"]:not([data-theme="dark"]) .logo-adaptive {{
+                     background-image: var(--img-logo-light) !important;
+                }}
+            }}
+        
+            .yellow-header {{
                 background-color: #FACC15;
                 color: #0F172A;
                 padding: 5px;
@@ -52,133 +117,58 @@ def inject_styles():
                 margin-bottom: -5px;
                 border: 1px solid var(--background-color);
                 border-bottom: none;
-            }
+            }}
             
-            .kpi-card {
+            .kpi-card {{
                 background: var(--card-bg);
                 border: 1px solid var(--card-border);
                 border-radius: 12px;
                 padding: 12px 14px;
                 box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-            }
+            }}
             
-            .kpi-label {
+            .kpi-label {{
                 color: var(--text-color);
                 font-size: 12px;
                 margin-bottom: 4px;
                 letter-spacing: 0.3px;
                 opacity: 0.8;
-            }
+            }}
             
-            .kpi-value {
+            .kpi-value {{
                 color: var(--primary-color);
                 font-size: 22px;
                 font-weight: 700;
-            }
+            }}
             
-            .kpi-sub {
+            .kpi-sub {{
                 color: var(--text-color);
                 font-size: 12px;
                 opacity: 0.6;
-            }
+            }}
             
-            .toolbar {
+            .toolbar {{
                 display: flex;
                 gap: 8px;
                 align-items: center;
                 justify-content: flex-end;
                 margin-bottom: 10px;
-            }
+            }}
             
-            .toolbar-badge {
+            .toolbar-badge {{
                 background: var(--secondary-background-color);
                 color: var(--text-color);
                 padding: 6px 10px;
                 border-radius: 999px;
                 font-size: 12px;
                 border: 1px solid var(--background-color);
-            }
+            }}
 
-            /* --- LOGO ADAPTÁVEL (Global) --- */
-            
-            /* Transição Suave */
-            .logo-dark, .logo-light, .sidebar-logo-dark, .sidebar-logo-light {
-                transition: opacity 0.3s ease;
-            }
-
-            /* PADRÃO (DARK MODE) */
-            .logo-dark, .sidebar-logo-dark { display: block !important; }
-            .logo-light, .sidebar-logo-light { display: none !important; }
-
-            /* LIGHT MODE (Detectado via atributo data-theme no HTML/Body/App) */
-            /* Streamlit aplica data-theme="light" em elementos raiz */
-            
-            [data-theme="light"] .logo-dark,
-            [data-theme="light"] .sidebar-logo-dark,
-            section[data-theme="light"] .logo-dark,
-            section[data-theme="light"] .sidebar-logo-dark {
-                display: none !important;
-            }
-
-            [data-theme="light"] .logo-light,
-            [data-theme="light"] .sidebar-logo-light,
-            section[data-theme="light"] .logo-light,
-            section[data-theme="light"] .sidebar-logo-light {
-                display: block !important;
-            }
-
-            /* FALLBACK DO SISTEMA (OS) */
-            @media (prefers-color-scheme: light) {
-                html:not([data-theme="dark"]) .logo-dark,
-                html:not([data-theme="dark"]) .sidebar-logo-dark { display: none !important; }
-                
-                html:not([data-theme="dark"]) .logo-light,
-                html:not([data-theme="dark"]) .sidebar-logo-light { display: block !important; }
-            }
+            /* Sidebar Input Fix (opcional, só para garantir contorno suave) */
+            section[data-testid="stSidebar"] .stTextInput > div > div {{
+                border-radius: 8px;
+            }}
         </style>
-        
-        <script>
-            function updateLogos() {
-                // Tenta detectar o tema checando a cor de fundo do body
-                const bgColor = window.getComputedStyle(document.body).backgroundColor;
-                // Converte rgb(255, 255, 255) para verificar se é claro
-                const isLight = bgColor === 'rgb(255, 255, 255)' || bgColor === '#ffffff';
-                
-                // Também checa atributos data-theme se existirem
-                const dataTheme = window.parent.document.body.getAttribute('data-theme') || 
-                                  document.body.getAttribute('data-theme');
-                                  
-                const effectiveLight = isLight || dataTheme === 'light';
-                
-                const darkLogos = document.querySelectorAll('.logo-dark, .sidebar-logo-dark');
-                const lightLogos = document.querySelectorAll('.logo-light, .sidebar-logo-light');
-                
-                if (effectiveLight) {
-                    darkLogos.forEach(el => el.style.setProperty('display', 'none', 'important'));
-                    lightLogos.forEach(el => el.style.setProperty('display', 'block', 'important'));
-                } else {
-                    darkLogos.forEach(el => el.style.setProperty('display', 'block', 'important'));
-                    lightLogos.forEach(el => el.style.setProperty('display', 'none', 'important'));
-                }
-            }
-            
-            // Roda ao carregar
-            updateLogos();
-            
-            // Monitora mudanças (Observer simples no body para atributos)
-            const observer = new MutationObserver(updateLogos);
-            observer.observe(document.body, { attributes: true, attributeFilter: ['class', 'style', 'data-theme'] });
-            
-            // Monitora mudanças no pai (Streamlit roda em Iframe)
-            try {
-                if (window.parent && window.parent.document) {
-                     observer.observe(window.parent.document.body, { attributes: true, attributeFilter: ['data-theme'] });
-                }
-            } catch(e) { }
-            
-            // Intervalo de segurança (caso o observer falhe)
-            setInterval(updateLogos, 1000);
-        </script>
         """,
         unsafe_allow_html=True,
     )

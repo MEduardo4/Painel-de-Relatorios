@@ -59,36 +59,22 @@ def render_login():
         st.write("")
         st.write("")
         
-        # Logo Centralizado via HTML (Infalível)
-        # Logo Centralizado via HTML com Suporte a Temas
+        # 0. Garante que os estilos (e o logo) estejam carregados
         try:
-            # Caminhos das duas imagens
-            img_dir = os.path.join(os.path.dirname(__file__), "images")
-            path_dark = os.path.join(img_dir, "Logo_BRG.png")       # Logo para fundo Escuro
-            path_light = os.path.join(img_dir, "Logo_BRGTemaClaro.png") # Logo para fundo Claro (Novo)
-            
-            # Converte para Base64
-            b64_dark = get_base64_image(path_dark)
-            try:
-                b64_light = get_base64_image(path_light)
-            except Exception:
-                # Fallback se não achar o claro: usa o escuro mesmo
-                b64_light = b64_dark
+             from Menu.comum.layout import inject_styles
+        except ImportError:
+             from comum.layout import inject_styles
+        inject_styles()
 
-            # HTML com as duas imagens sobrepostas (uma visível, outra oculta)
-            # O CSS que controla a exibição (.logo-dark / .logo-light) está em Menu/comum/layout.py
-            # e é injetado pelo app.py no início.
-            
-            st.markdown(
-                f"<div style='display: flex; justify-content: center; margin-bottom: 20px;'>"
-                f"<img src='data:image/png;base64,{b64_dark}' width='500' class='logo-dark'>"
-                f"<img src='data:image/png;base64,{b64_light}' width='500' class='logo-light'>"
-                f"</div>",
-                unsafe_allow_html=True
-            )
-        except Exception as e:
-            # Fallback total de segurança
-            st.error(f"Erro ao carregar logo: {e}")
+        # Logo Centralizado via CSS Global
+        st.markdown(
+            """
+            <div style="display: flex; justify-content: center; margin-bottom: 20px;">
+                <div class="logo-adaptive" style="width: 500px; height: 150px;"></div>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
 
         st.markdown("<h3 style='text-align: center; color: var(--text-color);'>Painel de Relatórios</h3>", unsafe_allow_html=True)
         st.markdown("<p style='text-align: center;' class='login-subtext'>Entre com sua conta corporativa para acessar</p>", unsafe_allow_html=True)

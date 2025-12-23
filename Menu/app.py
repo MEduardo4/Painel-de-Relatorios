@@ -47,40 +47,13 @@ def main():
         # Sidebar Global (Aparece apenas se NÃO for menu)
         with st.sidebar:
             # 1. Logo
-            # 1. Logo Adaptável
-            import base64
-            
-            def get_b64(path):
-                try:
-                    with open(path, "rb") as f:
-                        return base64.b64encode(f.read()).decode()
-                except:
-                    return ""
-
-            try:
-                img_dir = os.path.join(os.path.dirname(__file__), "images")
-                path_dark = os.path.join(img_dir, "Logo_BRG.png")
-                path_light = os.path.join(img_dir, "Logo_BRGTemaClaro.png")
-                
-                b64_d = get_b64(path_dark)
-                b64_l = get_b64(path_light)
-                
-                if not b64_l: b64_l = b64_d
-
-                # CSS agora está global em layout.py (inject_styles)
-                
-                st.markdown(
-                    f"""
-                    <div>
-                        <img src='data:image/png;base64,{b64_d}' class='sidebar-logo-dark'>
-                        <img src='data:image/png;base64,{b64_l}' class='sidebar-logo-light'>
-                    </div>
-                    """,
-                    unsafe_allow_html=True
-                )
-            except Exception:
-                # Fallback
-                st.image(path_dark, use_container_width=True)
+            # 1. Logo Adaptável (CSS Global em layout.py)
+            st.markdown(
+                """
+                <div class="logo-adaptive" style="height: 80px; margin-bottom: 20px;"></div>
+                """,
+                unsafe_allow_html=True
+            )
 
             # 2. Navegação
             if current_page != "admin":

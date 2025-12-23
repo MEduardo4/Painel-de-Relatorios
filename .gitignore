@@ -206,5 +206,6 @@ marimo/_static/
 marimo/_lsp/
 __marimo__/
 
+#
 Estoque-Em-Tempo-Real/backend/secrets.toml
 Menu/.streamlit/secrets.toml

@@ -204,4 +204,3 @@ def inject_styles():
         """,
         unsafe_allow_html=True,
     )
-```

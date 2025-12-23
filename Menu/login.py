@@ -60,6 +60,12 @@ def render_login():
         # Gera URL direto e mostra botão único
         auth_url = auth_service.get_auth_url(redirect_uri)
         
+        # DEBUG: MOSTRAR URL GERADA
+        st.write("--- DEBUG INFO ---")
+        st.write(f"**Redirect URI usada:** `{redirect_uri}`")
+        st.text_area("URL de Autenticação gerada (Copie e tente no navegador se o botão falhar):", auth_url, height=100)
+        st.write("------------------")
+        
         st.markdown(f"""
             <a href="{auth_url}" target="_self" style="text-decoration: none;">
                 <button style="

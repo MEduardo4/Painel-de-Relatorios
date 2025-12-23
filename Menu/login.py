@@ -133,18 +133,13 @@ def check_authentication():
                 st.session_state["user_info"] = token_result.get("id_token_claims", {})
                 st.session_state["access_token"] = token_result["access_token"]
                 
-                # st.query_params.clear() <-- Comentado para debug visual
+                # Limpa o código da URL para ficar limpo
+                st.query_params.clear()
                 
-                st.success("✅ Login Autorizado pela Microsoft!")
-                st.info("Token recebido com sucesso. Sessão iniciada.")
-                
-                # Botão Manual para garantir que o usuário veja o sucesso antes do redirect
-                if st.button(">> CLIQUE AQUI PARA ENTRAR NO SISTEMA <<", type="primary"):
-                    st.query_params.clear()
-                    st.rerun()
-                
-                # Stop para não carregar o resto da página misturado
-                st.stop()
+                # EM PRODUÇÃO: Deixar fluir. O rerun é opcional se o return True 
+                # for suficiente para o app.py renderizar o menu na próxima linha.
+                # Mas para limpar a URL visualmente, o rerun é bom.
+                st.rerun()
                 return True
             else:
                 st.error(f"❌ Erro na troca de token: {token_result.get('error_description')}")

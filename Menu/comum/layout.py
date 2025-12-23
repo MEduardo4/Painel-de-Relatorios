@@ -107,41 +107,7 @@ def inject_styles():
                 background-image: var(--img-logo-light) !important;
             }}
 
-        </style>
-        
-        <script>
-            // SCRIPT SENSOR DE TEMA
-            // Detecta a cor real do fundo e marca o body com uma classe "detected-light"
-            function detectTheme() {{
-                const body = window.parent.document.body || document.body;
-                const style = window.getComputedStyle(body);
-                const bg = style.backgroundColor;
-                
-                // Verifica se é branco ou muito claro
-                // rgb(255, 255, 255) ou rgba(255, 255, 255, 1)
-                const isLight = bg.includes('255, 255, 255') || bg === 'white' || bg === '#ffffff';
-                
-                // Tambem verifica data-theme
-                const attrTheme = body.getAttribute('data-theme');
-                const isLightTheme = attrTheme === 'light';
-                
-                if (isLight || isLightTheme) {{
-                    document.body.classList.add('detected-light');
-                    try {{ window.parent.document.body.classList.add('detected-light'); }} catch(e){{}}
-                }} else {{
-                    document.body.classList.remove('detected-light');
-                    try {{ window.parent.document.body.classList.remove('detected-light'); }} catch(e){{}}
-                }}
-            }}
-            
-            // Roda imediatamente
-            detectTheme();
-            // Roda a cada segundo para garantir
-            setInterval(detectTheme, 1000);
-        </script>
-        """,
-        unsafe_allow_html=True,
-    )            
+            /* --- ESTILOS GERAIS (Recuperados) --- */
             .yellow-header {{
                 background-color: #FACC15;
                 color: #0F172A;
@@ -199,11 +165,43 @@ def inject_styles():
                 border: 1px solid var(--background-color);
             }}
 
-            /* Sidebar Input Fix (opcional, só para garantir contorno suave) */
+            /* Sidebar Input Fix */
             section[data-testid="stSidebar"] .stTextInput > div > div {{
                 border-radius: 8px;
             }}
         </style>
+        
+        <script>
+            // SCRIPT SENSOR DE TEMA
+            // Detecta a cor real do fundo e marca o body com uma classe "detected-light"
+            function detectTheme() {{
+                const body = window.parent.document.body || document.body;
+                const style = window.getComputedStyle(body);
+                const bg = style.backgroundColor;
+                
+                // Verifica se é branco ou muito claro
+                // rgb(255, 255, 255) ou rgba(255, 255, 255, 1)
+                const isLight = bg.includes('255, 255, 255') || bg === 'white' || bg === '#ffffff';
+                
+                // Tambem verifica data-theme
+                const attrTheme = body.getAttribute('data-theme');
+                const isLightTheme = attrTheme === 'light';
+                
+                if (isLight || isLightTheme) {{
+                    document.body.classList.add('detected-light');
+                    try {{ window.parent.document.body.classList.add('detected-light'); }} catch(e){{}}
+                }} else {{
+                    document.body.classList.remove('detected-light');
+                    try {{ window.parent.document.body.classList.remove('detected-light'); }} catch(e){{}}
+                }}
+            }}
+            
+            // Roda imediatamente
+            detectTheme();
+            // Roda a cada segundo para garantir
+            setInterval(detectTheme, 1000);
+        </script>
         """,
         unsafe_allow_html=True,
     )
+```

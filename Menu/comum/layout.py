@@ -39,13 +39,9 @@ def get_adaptive_logo_svg(width="100%", height="auto"):
             current_dir = os.path.dirname(os.path.abspath(__file__)) 
             menu_dir = os.path.dirname(current_dir) 
             img_path = os.path.join(menu_dir, "images", filename)
-            # print(f"DEBUG: Tenting load image from: {img_path}")
             with open(img_path, "rb") as f:
-                data = base64.b64encode(f.read()).decode()
-                # print(f"DEBUG: Loaded {len(data)} bytes for {filename}")
-                return data
-        except Exception as e:
-            print(f"DEBUG ERROR loading {filename}: {e}")
+                return base64.b64encode(f.read()).decode()
+        except:
             return ""
 
     b64_dark = get_b64("Logo_BRG.png")
@@ -55,25 +51,33 @@ def get_adaptive_logo_svg(width="100%", height="auto"):
     if not b64_light: b64_light = b64_dark
     if not b64_dark: b64_dark = b64_light
 
-    # SVG Inline com CSS interno para preencher e trocar
-    svg = f"""<svg width="{width}" height="{height}" viewBox="0 0 500 150" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" class="adaptive-svg-logo">
-    <style>
-        /* Padrão para SVG */
-        .logo-img-dark {{ display: block; }}
-        .logo-img-light {{ display: none; }}
-        
-        /* Detecção de Sistema Operacional */
-        @media (prefers-color-scheme: light) {{
-            .logo-img-dark {{ display: none; }}
-            .logo-img-light {{ display: block; }}
+    # CSS Background Image approach (More robust)
+    html = f"""
+<style>
+    .adaptive-logo-container {{
+        width: {width};
+        height: {height};
+        background-size: contain;
+        background-repeat: no-repeat;
+        background-position: center;
+        background-image: url('data:image/png;base64,{b64_dark}');
+    }}
+    
+    /* Light Mode Overrides */
+    @media (prefers-color-scheme: light) {{
+        .adaptive-logo-container {{
+            background-image: url('data:image/png;base64,{b64_light}');
         }}
-    </style>
-    <!-- Imagem Escura (Default) -->
-    <image href="data:image/png;base64,{b64_dark}" xlink:href="data:image/png;base64,{b64_dark}" width="500" height="150" class="logo-img-dark" />
-    <!-- Imagem Clara -->
-    <image href="data:image/png;base64,{b64_light}" xlink:href="data:image/png;base64,{b64_light}" width="500" height="150" class="logo-img-light" />
-</svg>"""
-    return svg
+    }}
+    
+    body.detected-light .adaptive-logo-container,
+    [data-theme="light"] .adaptive-logo-container {{
+        background-image: url('data:image/png;base64,{b64_light}') !important;
+    }}
+</style>
+<div class="adaptive-logo-container"></div>
+"""
+    return html
 
 def inject_styles():
     # Injeta apenas o CSS global que controla as classes do SVG

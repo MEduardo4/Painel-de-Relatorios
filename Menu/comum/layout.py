@@ -40,11 +40,7 @@ def inject_styles():
             }
             
             /* Melhoria visual nos inputs da Sidebar (sem forçar cor preta) */
-            section[data-testid="stSidebar"] .stTextInput > div > div,
-            section[data-testid="stSidebar"] .stSelectbox > div > div,
-            section[data-testid="stSidebar"] .stMultiSelect > div > div {
-                border-radius: 10px !important;
-            }
+            /* Removido para garantir compatibilidade total com temas */
             
             .yellow-header {
                 background-color: #FACC15;

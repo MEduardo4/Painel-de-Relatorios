@@ -89,7 +89,7 @@ def render_login():
         st.write("------------------")
         
         st.markdown(f"""
-            <a href="{auth_url}" target="_self" style="text-decoration: none;">
+            <a href="{auth_url}" target="_top" style="text-decoration: none;">
                 <button class="login-button">
                     🔐 Entrar com Microsoft
                 </button>

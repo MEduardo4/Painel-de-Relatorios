@@ -92,3 +92,5 @@ def check_user_access(user_email, report_key):
     allowed_list = [email.lower() for email in allowed_list]
     
     return user_email.lower() in allowed_list
+
+    #Teste de permissão

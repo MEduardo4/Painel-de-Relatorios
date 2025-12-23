@@ -78,18 +78,34 @@ def render_login():
             # CSS para troca automática
             st.markdown("""
             <style>
-                /* Padrão (Dark Mode) ou Fallback */
-                .logo-dark { display: block; }
-                .logo-light { display: none; }
+                /* CLASSE BASE */
+                .logo-dark, .logo-light {
+                    transition: opacity 0.3s ease;
+                }
 
-                /* Light Mode (Detectado via atributo do Streamlit) */
-                [data-theme="light"] .logo-dark { display: none; }
-                [data-theme="light"] .logo-light { display: block; }
+                /* PADRÃO (DARK MODE) */
+                .logo-dark { display: block !important; }
+                .logo-light { display: none !important; }
 
-                /* Light Mode (Detectado via Sistema Operacional) */
+                /* LIGHT MODE (Detectado via atributo do 'body' ou 'section') */
+                /* Streamlit injeta 'data-theme' no pai. Usamos :has() ou cascata */
+                
+                [data-theme="light"] .logo-dark,
+                section[data-theme="light"] .logo-dark,
+                div[data-theme="light"] .logo-dark {
+                    display: none !important;
+                }
+
+                [data-theme="light"] .logo-light,
+                section[data-theme="light"] .logo-light,
+                div[data-theme="light"] .logo-light {
+                    display: block !important;
+                }
+
+                /* FALLBACK DO SISTEMA (OS) */
                 @media (prefers-color-scheme: light) {
-                    .logo-dark { display: none; }
-                    .logo-light { display: block; }
+                    .logo-dark { display: none !important; }
+                    .logo-light { display: block !important; }
                 }
             </style>
             """, unsafe_allow_html=True)

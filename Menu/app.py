@@ -69,15 +69,24 @@ def main():
                 st.markdown("""
                 <style>
                     /* Sidebar Logo Toggle */
-                    .sidebar-logo-dark { display: block; margin-bottom: 20px; width: 100%; }
-                    .sidebar-logo-light { display: none; margin-bottom: 20px; width: 100%; }
+                    .sidebar-logo-dark { display: block !important; margin-bottom: 20px; width: 100%; }
+                    .sidebar-logo-light { display: none !important; margin-bottom: 20px; width: 100%; }
 
-                    [data-theme="light"] .sidebar-logo-dark { display: none; }
-                    [data-theme="light"] .sidebar-logo-light { display: block; }
+                    [data-theme="light"] .sidebar-logo-dark,
+                    section[data-theme="light"] .sidebar-logo-dark,
+                    div[data-theme="light"] .sidebar-logo-dark {
+                         display: none !important; 
+                    }
+                    
+                    [data-theme="light"] .sidebar-logo-light,
+                    section[data-theme="light"] .sidebar-logo-light,
+                    div[data-theme="light"] .sidebar-logo-light {
+                         display: block !important; 
+                    }
                     
                     @media (prefers-color-scheme: light) {
-                         .sidebar-logo-dark { display: none; }
-                         .sidebar-logo-light { display: block; }
+                         .sidebar-logo-dark { display: none !important; }
+                         .sidebar-logo-light { display: block !important; }
                     }
                 </style>
                 """, unsafe_allow_html=True)

@@ -73,11 +73,9 @@ def render_login():
             svg_logo = get_adaptive_logo_svg(width="500", height="150")
             
             st.markdown(
-                f"""
-                <div style="display: flex; justify-content: center; margin-bottom: 20px;">
-                    {svg_logo}
-                </div>
-                """,
+                f"""<div style="display: flex; justify-content: center; margin-bottom: 20px;">
+    {svg_logo}
+</div>""",
                 unsafe_allow_html=True
             )
         except Exception as e:

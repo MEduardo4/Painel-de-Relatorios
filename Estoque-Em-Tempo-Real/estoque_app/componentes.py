@@ -49,11 +49,11 @@ def render_filters(tabela_estoque):
     # Campos de seleção múltipla (listas)
     # sorted(...) organiza as opções em ordem alfabética para facilitar
     # unique() pega apenas os valores únicos daquela coluna
-    filtro_grupo = st.sidebar.multiselect("Grupo", sorted(tabela_estoque["DescGrupo"].unique()))
-    filtro_tipo = st.sidebar.multiselect("Tipo", sorted(tabela_estoque["DescTipo"].unique()))
-    filtro_armazem = st.sidebar.multiselect("Armazém", sorted(tabela_estoque["DescArmazem"].unique()))
-    filtro_filial = st.sidebar.multiselect("Filial", sorted(tabela_estoque["Filial"].unique()))
-    filtro_bloq = st.sidebar.multiselect("Bloqueado", sorted(tabela_estoque["Bloq"].unique()))
+    filtro_grupo = st.sidebar.multiselect("Grupo", sorted(tabela_estoque["DescGrupo"].dropna().unique()))
+    filtro_tipo = st.sidebar.multiselect("Tipo", sorted(tabela_estoque["DescTipo"].dropna().unique()))
+    filtro_armazem = st.sidebar.multiselect("Armazém", sorted(tabela_estoque["DescArmazem"].dropna().unique()))
+    filtro_filial = st.sidebar.multiselect("Filial", sorted(tabela_estoque["Filial"].dropna().unique()))
+    filtro_bloq = st.sidebar.multiselect("Bloqueado", sorted(tabela_estoque["Bloq"].dropna().unique()))
     
     # Checkbox simples (Sim/Não)
     filtro_saldo = st.sidebar.checkbox("Somente com saldo > 0", value=False)

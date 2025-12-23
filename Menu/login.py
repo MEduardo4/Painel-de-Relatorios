@@ -60,19 +60,51 @@ def render_login():
         st.write("")
         
         # Logo Centralizado via HTML (Infalível)
+        # Logo Centralizado via HTML com Suporte a Temas
         try:
-            img_path = os.path.join(os.path.dirname(__file__), "images", "Logo_BRG.png")
-            img_b64 = get_base64_image(img_path)
+            # Caminhos das duas imagens
+            img_dir = os.path.join(os.path.dirname(__file__), "images")
+            path_dark = os.path.join(img_dir, "Logo_BRG.png")       # Logo para fundo Escuro
+            path_light = os.path.join(img_dir, "Logo_BRGTemaClaro.png") # Logo para fundo Claro (Novo)
+            
+            # Converte para Base64
+            b64_dark = get_base64_image(path_dark)
+            try:
+                b64_light = get_base64_image(path_light)
+            except Exception:
+                # Fallback se não achar o claro: usa o escuro mesmo
+                b64_light = b64_dark
+
+            # CSS para troca automática
+            st.markdown("""
+            <style>
+                /* Padrão (Dark Mode) ou Fallback */
+                .logo-dark { display: block; }
+                .logo-light { display: none; }
+
+                /* Light Mode (Detectado via atributo do Streamlit) */
+                [data-theme="light"] .logo-dark { display: none; }
+                [data-theme="light"] .logo-light { display: block; }
+
+                /* Light Mode (Detectado via Sistema Operacional) */
+                @media (prefers-color-scheme: light) {
+                    .logo-dark { display: none; }
+                    .logo-light { display: block; }
+                }
+            </style>
+            """, unsafe_allow_html=True)
+
+            # HTML com as duas imagens sobrepostas (uma visível, outra oculta)
             st.markdown(
                 f"<div style='display: flex; justify-content: center; margin-bottom: 20px;'>"
-                f"<img src='data:image/png;base64,{img_b64}' width='500'>"
+                f"<img src='data:image/png;base64,{b64_dark}' width='500' class='logo-dark'>"
+                f"<img src='data:image/png;base64,{b64_light}' width='500' class='logo-light'>"
                 f"</div>",
                 unsafe_allow_html=True
             )
-        except Exception:
-            # Fallback caso não ache a imagem
-            img_path = os.path.join(os.path.dirname(__file__), "images", "Logo_BRG.png")
-            st.image(img_path, width=600)
+        except Exception as e:
+            # Fallback total de segurança
+            st.error(f"Erro ao carregar logo: {e}")
 
         st.markdown("<h3 style='text-align: center; color: var(--text-color);'>Painel de Relatórios</h3>", unsafe_allow_html=True)
         st.markdown("<p style='text-align: center;' class='login-subtext'>Entre com sua conta corporativa para acessar</p>", unsafe_allow_html=True)

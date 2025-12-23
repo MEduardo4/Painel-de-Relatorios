@@ -92,8 +92,11 @@ def render_login():
             </div>
         """, unsafe_allow_html=True)
         
-        st.write("")
-        st.write("")
+        # DEBUG DE SOBREVIVÊNCIA: Se o botão falhar, o link cru funciona
+        st.write("---")
+        st.warning("Se o botão acima não funcionar, clique no link abaixo:")
+        st.write(f"Link Bruto: {auth_url}")
+        st.write("---")
 
 def check_authentication():
     """

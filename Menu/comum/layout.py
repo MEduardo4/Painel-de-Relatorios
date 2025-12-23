@@ -51,11 +51,11 @@ def inject_styles():
     b64_dark = get_b64("Logo_BRG.png")
     b64_light = get_b64("Logo_BRGTemaClaro.png")
     
-    # Se não tiver a clara, usa a escura (Mas vamos forçar o Invert agora)
+    # Se não tiver a clara, usa a escura
     if not b64_light: 
-        # st.toast("Aviso: Logo Claro não encontrado, usarei filtro de inversão.", icon="⚠️")
+        # Fallback silencioso
         b64_light = b64_dark
-    # if not b64_dark: b64_dark = b64_light # Vice versa para garantir
+    if not b64_dark: b64_dark = b64_light 
 
     # 2. Injeta CSS com Variáveis CSS para imagens
     st.markdown(
@@ -66,52 +66,82 @@ def inject_styles():
                 --card-bg: var(--secondary-background-color);
                 --card-border: var(--background-color);
                 
-                /* Usamos a MESMA imagem base (Escura/Branca) e invertemos via CSS se necessário */
-                --img-logo-main: url('data:image/png;base64,{b64_dark}');
+                /* Definição das Imagens */
+                --img-logo-dark: url('data:image/png;base64,{b64_dark}');
+                --img-logo-light: url('data:image/png;base64,{b64_light}');
             }}
             
-            /* --- LOGO ADAPTÁVEL (CSS FILTER MAGIC) --- */
+            /* --- LOGO ADAPTÁVEL --- */
             
             .logo-adaptive {{
                 display: block;
                 background-size: contain;
                 background-repeat: no-repeat;
                 background-position: center;
-                /* Logo Padrão (Feito para Fundo Escuro -> Texto Branco) */
-                background-image: var(--img-logo-main);
-                transition: all 0.3s ease;
-                filter: none; /* Normal */
+                /* Padrão: Logo Escuro */
+                background-image: var(--img-logo-dark);
+                transition: background-image 0.2s ease-in-out;
             }}
 
-            /* 2. REGRAS PARA MODO CLARO (LIGHT MODE) */
-            /* Se o fundo for branco, aplicamos INVERT para tornar o Branco em Preto */
+            /* --- REGRAS DE TROCA (Swapping) --- */
+
+            /* 1. Atributos Nativos do Streamlit (Se funcionarem) */
+            [data-theme="light"] .logo-adaptive,
+            section[data-theme="light"] .logo-adaptive,
+            html[data-theme="light"] .logo-adaptive {{
+                background-image: var(--img-logo-light) !important;
+            }}
             
-            /* Caso 1: Atributo data-theme na tag HTML ou BODY */
-            html[data-theme="light"] .logo-adaptive,
-            body[data-theme="light"] .logo-adaptive,
-            /* Caso 2: Atributo no App Container (div principal do Streamlit) */
-            [data-testid="stApp"][data-theme="light"] .logo-adaptive,
-            /* Caso 3: Section main */
-            section[data-testid="stMain"][data-theme="light"] .logo-adaptive,
-            /* Caso 4: Qualquer pai com data-theme light */
-            [data-theme="light"] .logo-adaptive {{
-                /* Inverte as cores: Branco vira Preto, Amarelo vira Azul... */
-                /* Ajustamos o brightness para garantir preto forte */
-                filter: invert(1) brightness(0) !important; 
-                opacity: 0.8 !important; /* Suavizar um pouco o preto absoluto */
-            }}
-
-            /* Caso 5: Preferência do Sistema (OS Light Mode) */
-            /* Apenas se NÃO estiver forçado para dark no HTML */
+            /* 2. Preferência do Sistema (OS) */
             @media (prefers-color-scheme: light) {{
                 html:not([data-theme="dark"]) .logo-adaptive,
-                body:not([data-theme="dark"]) .logo-adaptive,
                 [data-testid="stApp"]:not([data-theme="dark"]) .logo-adaptive {{
-                     filter: invert(1) brightness(0) !important;
-                     opacity: 0.8 !important;
+                     background-image: var(--img-logo-light) !important;
                 }}
             }}
+            
+            /* 3. CLASSE FORÇADA VIA JS (Detected Light) */
+            /* O script abaixo adiciona essa classe ao body se detectar fundo branco */
+            body.detected-light .logo-adaptive,
+            .detected-light .logo-adaptive {{
+                background-image: var(--img-logo-light) !important;
+            }}
+
+        </style>
         
+        <script>
+            // SCRIPT SENSOR DE TEMA
+            // Detecta a cor real do fundo e marca o body com uma classe "detected-light"
+            function detectTheme() {{
+                const body = window.parent.document.body || document.body;
+                const style = window.getComputedStyle(body);
+                const bg = style.backgroundColor;
+                
+                // Verifica se é branco ou muito claro
+                // rgb(255, 255, 255) ou rgba(255, 255, 255, 1)
+                const isLight = bg.includes('255, 255, 255') || bg === 'white' || bg === '#ffffff';
+                
+                // Tambem verifica data-theme
+                const attrTheme = body.getAttribute('data-theme');
+                const isLightTheme = attrTheme === 'light';
+                
+                if (isLight || isLightTheme) {{
+                    document.body.classList.add('detected-light');
+                    try {{ window.parent.document.body.classList.add('detected-light'); }} catch(e){{}}
+                }} else {{
+                    document.body.classList.remove('detected-light');
+                    try {{ window.parent.document.body.classList.remove('detected-light'); }} catch(e){{}}
+                }}
+            }}
+            
+            // Roda imediatamente
+            detectTheme();
+            // Roda a cada segundo para garantir
+            setInterval(detectTheme, 1000);
+        </script>
+        """,
+        unsafe_allow_html=True,
+    )            
             .yellow-header {{
                 background-color: #FACC15;
                 color: #0F172A;

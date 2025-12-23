@@ -51,9 +51,11 @@ def inject_styles():
     b64_dark = get_b64("Logo_BRG.png")
     b64_light = get_b64("Logo_BRGTemaClaro.png")
     
-    # Se não tiver a clara, usa a escura
-    if not b64_light: b64_light = b64_dark
-    if not b64_dark: b64_dark = b64_light # Vice versa para garantir
+    # Se não tiver a clara, usa a escura (Mas vamos forçar o Invert agora)
+    if not b64_light: 
+        # st.toast("Aviso: Logo Claro não encontrado, usarei filtro de inversão.", icon="⚠️")
+        b64_light = b64_dark
+    # if not b64_dark: b64_dark = b64_light # Vice versa para garantir
 
     # 2. Injeta CSS com Variáveis CSS para imagens
     st.markdown(
@@ -64,26 +66,25 @@ def inject_styles():
                 --card-bg: var(--secondary-background-color);
                 --card-border: var(--background-color);
                 
-                /* Imagens convertidas para variaveis (Payload) */
-                --img-logo-dark: url('data:image/png;base64,{b64_dark}');
-                --img-logo-light: url('data:image/png;base64,{b64_light}');
+                /* Usamos a MESMA imagem base (Escura/Branca) e invertemos via CSS se necessário */
+                --img-logo-main: url('data:image/png;base64,{b64_dark}');
             }}
             
-               /* --- LOGO ADAPTÁVEL (Global) --- */
+            /* --- LOGO ADAPTÁVEL (CSS FILTER MAGIC) --- */
             
-            /* 1. Definição via Variáveis para facilitar */
             .logo-adaptive {{
                 display: block;
                 background-size: contain;
                 background-repeat: no-repeat;
                 background-position: center;
-                /* Padrão: Imagem Escura (para fundo escuro) - Texto Branco */
-                background-image: var(--img-logo-dark);
-                transition: background-image 0.2s ease-in-out;
+                /* Logo Padrão (Feito para Fundo Escuro -> Texto Branco) */
+                background-image: var(--img-logo-main);
+                transition: all 0.3s ease;
+                filter: none; /* Normal */
             }}
 
             /* 2. REGRAS PARA MODO CLARO (LIGHT MODE) */
-            /* Quando o fundo é branco, queremos a Imagem Clara (Texto Escuro) */
+            /* Se o fundo for branco, aplicamos INVERT para tornar o Branco em Preto */
             
             /* Caso 1: Atributo data-theme na tag HTML ou BODY */
             html[data-theme="light"] .logo-adaptive,
@@ -94,7 +95,10 @@ def inject_styles():
             section[data-testid="stMain"][data-theme="light"] .logo-adaptive,
             /* Caso 4: Qualquer pai com data-theme light */
             [data-theme="light"] .logo-adaptive {{
-                background-image: var(--img-logo-light) !important;
+                /* Inverte as cores: Branco vira Preto, Amarelo vira Azul... */
+                /* Ajustamos o brightness para garantir preto forte */
+                filter: invert(1) brightness(0) !important; 
+                opacity: 0.8 !important; /* Suavizar um pouco o preto absoluto */
             }}
 
             /* Caso 5: Preferência do Sistema (OS Light Mode) */
@@ -103,7 +107,8 @@ def inject_styles():
                 html:not([data-theme="dark"]) .logo-adaptive,
                 body:not([data-theme="dark"]) .logo-adaptive,
                 [data-testid="stApp"]:not([data-theme="dark"]) .logo-adaptive {{
-                     background-image: var(--img-logo-light) !important;
+                     filter: invert(1) brightness(0) !important;
+                     opacity: 0.8 !important;
                 }}
             }}
         

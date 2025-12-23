@@ -7,6 +7,11 @@ from comum.layout import setup_page
 def main():
     # 0. Configura página primeiro
     setup_page()
+    
+    # DEBUG EXTREMO: VER O QUE ESTÁ CHEGANDO
+    st.write("--- DEBUG PARAMS ---")
+    st.write(st.query_params)
+    st.write("--------------------")
 
     # 1. Ajusta PATH para importar projetos vizinhos
     import sys

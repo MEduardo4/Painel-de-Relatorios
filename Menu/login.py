@@ -28,6 +28,9 @@ def render_login():
     col_left, col_center, col_right = st.columns([1, 1.2, 1])
 
     with col_center:
+        st.error("⚠️ VERSÃO DEBUG: 99.1 - CHECANDO DEPLOY ⚠️")
+        st.write(f"URI esperada: {get_redirect_uri()}")
+        
         # Espaçamento vertical
         st.write("")
         st.write("")

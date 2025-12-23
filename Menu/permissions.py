@@ -1,49 +1,89 @@
-import json
-import os
 import streamlit as st
+from backend.db import build_connection_string, connect
 
 # Admin Hardcoded (Único que tem acesso à engrenagem)
 ADMIN_EMAIL = "eduardo.marconi@brggeradores.com.br"
 
-# Caminho do arquivo JSON no mesmo diretório deste script
-PERMISSIONS_FILE = os.path.join(os.path.dirname(__file__), "permissions.json")
+def _ensure_table_exists():
+    """Garante que a tabela de permissões existe no banco."""
+    conn_str = build_connection_string()
+    try:
+        with connect(conn_str) as conn:
+            cursor = conn.cursor()
+            # Tenta criar a tabela se não existir
+            cursor.execute("""
+                IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='AppPermissions' AND xtype='U')
+                CREATE TABLE AppPermissions (
+                    report_key VARCHAR(50),
+                    user_email VARCHAR(200)
+                )
+            """)
+            conn.commit()
+    except Exception as e:
+        st.error(f"Erro ao inicializar tabela de permissões: {e}")
 
 def load_permissions():
-    """Carrega as permissões do arquivo JSON. Se não existir, cria padrão."""
-    if not os.path.exists(PERMISSIONS_FILE):
-        default_data = {
-            "stock": [ADMIN_EMAIL], # Admin sempre tem acesso inicial
-            # "sales": [] ... futuros relatórios
-        }
-        save_permissions(default_data)
-        return default_data
+    """Carrega as permissões do Banco de Dados. Retorna um dict."""
+    _ensure_table_exists()
+    
+    permissions = {}
+    conn_str = build_connection_string()
     
     try:
-        with open(PERMISSIONS_FILE, "r", encoding="utf-8") as f:
-            return json.load(f)
+        with connect(conn_str) as conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT report_key, user_email FROM AppPermissions")
+            rows = cursor.fetchall()
+            
+            for row in rows:
+                key = row.report_key
+                email = row.user_email
+                if key not in permissions:
+                    permissions[key] = []
+                permissions[key].append(email)
+                
+        # Garante que Admin sempre está na lista (memória)
+        if "stock" not in permissions:
+             permissions["stock"] = []
+        if ADMIN_EMAIL not in permissions["stock"]:
+             permissions["stock"].append(ADMIN_EMAIL)
+             
+        return permissions
+
     except Exception as e:
-        st.error(f"Erro ao carregar permissões: {e}")
-        return {}
+        st.error(f"Erro ao carregar permissões do banco: {e}")
+        return {"stock": [ADMIN_EMAIL]}
 
 def save_permissions(data):
-    """Salva as permissões no arquivo JSON."""
+    """Salva as permissões no Banco de Dados (Limpa e reescreve)."""
+    conn_str = build_connection_string()
     try:
-        with open(PERMISSIONS_FILE, "w", encoding="utf-8") as f:
-            json.dump(data, f, indent=2)
+        with connect(conn_str) as conn:
+            cursor = conn.cursor()
+            
+            # 1. Limpa tabela
+            cursor.execute("DELETE FROM AppPermissions")
+            
+            # 2. Insere novos dados
+            for key, emails in data.items():
+                for email in emails:
+                    # Normaliza
+                    safe_email = email.strip().lower()
+                    if safe_email:
+                        cursor.execute("INSERT INTO AppPermissions (report_key, user_email) VALUES (?, ?)", (key, safe_email))
+            
+            conn.commit()
+            
     except Exception as e:
-        st.error(f"Erro ao salvar permissões: {e}")
+        st.error(f"Erro ao salvar permissões no banco: {e}")
 
 def check_user_access(user_email, report_key):
     """
     Verifica se o usuário tem acesso ao relatório.
-    Admin tem acesso a TUDO automaticamente? 
-    Não necessariamente, mas para editar ele precisa ver.
     """
     if user_email.lower() == ADMIN_EMAIL.lower():
-        # Se for admin, verifica se está na lista (para permitir testes)
-        # Se quiser que admin tenha acesso total sempre, descomente abaixo:
-        # return True
-        pass
+        # Admin sempre pode
+        return True
     
     perms = load_permissions()
     allowed_list = perms.get(report_key, [])

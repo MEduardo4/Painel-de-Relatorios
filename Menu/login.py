@@ -95,13 +95,6 @@ def check_authentication():
 
     # 2. Se voltou do Azure com um código na URL
     query_params = st.query_params
-    
-    # Fallback para versões antigas ou comportamento inconsistente
-    if not query_params:
-        try:
-            query_params = st.experimental_get_query_params()
-        except:
-            pass
 
     # Tenta pegar 'code' de qualquer formato (dict ou list)
     code = None

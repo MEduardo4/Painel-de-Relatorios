@@ -129,7 +129,6 @@ def inject_styles():
 
             /* FALLBACK DO SISTEMA (OS) */
             @media (prefers-color-scheme: light) {
-                /* Se não houver override do Streamlit (data-theme), usa o sistema */
                 html:not([data-theme="dark"]) .logo-dark,
                 html:not([data-theme="dark"]) .sidebar-logo-dark { display: none !important; }
                 
@@ -137,6 +136,49 @@ def inject_styles():
                 html:not([data-theme="dark"]) .sidebar-logo-light { display: block !important; }
             }
         </style>
+        
+        <script>
+            function updateLogos() {
+                // Tenta detectar o tema checando a cor de fundo do body
+                const bgColor = window.getComputedStyle(document.body).backgroundColor;
+                // Converte rgb(255, 255, 255) para verificar se é claro
+                const isLight = bgColor === 'rgb(255, 255, 255)' || bgColor === '#ffffff';
+                
+                // Também checa atributos data-theme se existirem
+                const dataTheme = window.parent.document.body.getAttribute('data-theme') || 
+                                  document.body.getAttribute('data-theme');
+                                  
+                const effectiveLight = isLight || dataTheme === 'light';
+                
+                const darkLogos = document.querySelectorAll('.logo-dark, .sidebar-logo-dark');
+                const lightLogos = document.querySelectorAll('.logo-light, .sidebar-logo-light');
+                
+                if (effectiveLight) {
+                    darkLogos.forEach(el => el.style.setProperty('display', 'none', 'important'));
+                    lightLogos.forEach(el => el.style.setProperty('display', 'block', 'important'));
+                } else {
+                    darkLogos.forEach(el => el.style.setProperty('display', 'block', 'important'));
+                    lightLogos.forEach(el => el.style.setProperty('display', 'none', 'important'));
+                }
+            }
+            
+            // Roda ao carregar
+            updateLogos();
+            
+            // Monitora mudanças (Observer simples no body para atributos)
+            const observer = new MutationObserver(updateLogos);
+            observer.observe(document.body, { attributes: true, attributeFilter: ['class', 'style', 'data-theme'] });
+            
+            // Monitora mudanças no pai (Streamlit roda em Iframe)
+            try {
+                if (window.parent && window.parent.document) {
+                     observer.observe(window.parent.document.body, { attributes: true, attributeFilter: ['data-theme'] });
+                }
+            } catch(e) { }
+            
+            // Intervalo de segurança (caso o observer falhe)
+            setInterval(updateLogos, 1000);
+        </script>
         """,
         unsafe_allow_html=True,
     )

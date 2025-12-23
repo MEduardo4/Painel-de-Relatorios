@@ -3,7 +3,11 @@ SELECT M0_FILIAL AS Filial,
     B2_COD AS CodigoProduto,
     B1_DESC AS NomeProduto,
     B1_UM AS UM,
-    B1_MSBLQL AS Bloq,
+    CASE
+        WHEN B1_MSBLQL = 1 THEN "1 - Sim"
+        WHEN B1_MSBLQL = 2 THEN "2 - Não"
+        ELSE Null
+    END AS Bloq,
     CONCAT(B2_LOCAL, '-', NNR_DESCRI) AS DescArmazem,
     B2_LOCAL AS Armazem,
     B1_TIPO AS Tipo,

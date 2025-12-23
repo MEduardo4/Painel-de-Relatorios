@@ -95,8 +95,25 @@ def check_authentication():
 
     # 2. Se voltou do Azure com um código na URL
     query_params = st.query_params
+    
+    # Fallback para versões antigas ou comportamento inconsistente
+    if not query_params:
+        try:
+            query_params = st.experimental_get_query_params()
+        except:
+            pass
+
+    # Tenta pegar 'code' de qualquer formato (dict ou list)
+    code = None
     if "code" in query_params:
-        st.info(f"DEBUG: CÓDIGO RECEBIDO DE AZURE! {query_params['code']}")
+        val = query_params["code"]
+        if isinstance(val, list):
+             code = val[0]
+        else:
+             code = val
+
+    if code:
+        st.info(f"DEBUG: CÓDIGO RECEBIDO DE AZURE! {code}")
         st.warning("Se você está lendo isso, o loop parou AQUI.")
         st.stop()
         

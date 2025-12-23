@@ -9,11 +9,22 @@ except ModuleNotFoundError:  # pragma: no cover - fallback for Python <3.11
 SECRETS_PATH = Path(__file__).resolve().parent / "secrets.toml"
 
 
+import streamlit as st
+
 def load_secrets():
-    if not SECRETS_PATH.exists():
-        raise FileNotFoundError(f"Arquivo de credenciais nao encontrado em {SECRETS_PATH}")
-    with SECRETS_PATH.open("rb") as f:
-        return tomllib.load(f)
+    # 1. Tentar ler de st.secrets (Nativo do Streamlit Cloud)
+    try:
+        if "sql_server" in st.secrets:
+            return st.secrets
+    except Exception:
+        pass # Falha silenciosa para tentar arquivo local
+
+    # 2. Tentar ler arquivo local (Fallback para desenvolvimento sem streamlit run)
+    if SECRETS_PATH.exists():
+        with SECRETS_PATH.open("rb") as f:
+            return tomllib.load(f)
+            
+    raise FileNotFoundError(f"Arquivo de credenciais nao encontrado em {SECRETS_PATH} e st.secrets não configurado.")
 
 
 def build_connection_string(secrets=None):

@@ -135,7 +135,7 @@ def check_authentication():
                 
                 # Limpa o código da URL para ficar limpo
                 st.query_params.clear()
-                st.rerun()
+                # st.rerun() <- Removido para evitar perda de sessão
                 return True
             else:
                 st.error(f"Erro de Autenticação: {token_result.get('error_description')}")

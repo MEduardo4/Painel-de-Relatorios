@@ -47,13 +47,14 @@ def main():
         # Sidebar Global (Aparece apenas se NÃO for menu)
         with st.sidebar:
             # 1. Logo
-            # 1. Logo Adaptável (CSS Global em layout.py)
-            st.markdown(
-                """
-                <div class="logo-adaptive" style="height: 80px; margin-bottom: 20px;"></div>
-                """,
-                unsafe_allow_html=True
-            )
+            # 1. Logo Adaptável (SVG Inline)
+            try:
+                from Menu.comum.layout import get_adaptive_logo_svg
+                svg_logo = get_adaptive_logo_svg(width="100%", height="80")
+                st.markdown(svg_logo, unsafe_allow_html=True)
+            except Exception as e:
+                # Fallback simples
+                st.error(f"Logo error: {e}")
 
             # 2. Navegação
             if current_page != "admin":

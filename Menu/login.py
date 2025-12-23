@@ -66,15 +66,22 @@ def render_login():
              from comum.layout import inject_styles
         inject_styles()
 
-        # Logo Centralizado via CSS Global
-        st.markdown(
-            """
-            <div style="display: flex; justify-content: center; margin-bottom: 20px;">
-                <div class="logo-adaptive" style="width: 500px; height: 150px;"></div>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
+        # Logo Centralizado via CSS Global + SVG Inline (Nova Estrutura)
+        try:
+            from Menu.comum.layout import get_adaptive_logo_svg
+            # Altura maior para o login
+            svg_logo = get_adaptive_logo_svg(width="500", height="150")
+            
+            st.markdown(
+                f"""
+                <div style="display: flex; justify-content: center; margin-bottom: 20px;">
+                    {svg_logo}
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
+        except Exception as e:
+            st.error(f"Erro ao carregar logo: {e}")
 
         st.markdown("<h3 style='text-align: center; color: var(--text-color);'>Painel de Relatórios</h3>", unsafe_allow_html=True)
         st.markdown("<p style='text-align: center;' class='login-subtext'>Entre com sua conta corporativa para acessar</p>", unsafe_allow_html=True)

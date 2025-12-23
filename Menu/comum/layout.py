@@ -29,86 +29,78 @@ def render_header():
     )
 
 
-def inject_styles():
-    # 1. Carrega imagens em Base64 para CSS
+# Função auxiliar para gerar SVG inline com as duas imagens embutidas
+def get_adaptive_logo_svg(width="100%", height="auto"):
     import os
     import base64
 
     def get_b64(filename):
         try:
-            # Caminho relativo: layout.py está em Menu/comum/ -> subir para Menu/images
-            # Menu/comum/../../Menu/images (segurança: usar abspath)
-            current_dir = os.path.dirname(os.path.abspath(__file__)) # Menu/comum
-            menu_dir = os.path.dirname(current_dir) # Menu
+            current_dir = os.path.dirname(os.path.abspath(__file__)) 
+            menu_dir = os.path.dirname(current_dir) 
             img_path = os.path.join(menu_dir, "images", filename)
-            
             with open(img_path, "rb") as f:
                 return base64.b64encode(f.read()).decode()
-        except Exception as e:
-            # print(f"Erro ao carregar imagem {filename}: {e}")
+        except:
             return ""
 
     b64_dark = get_b64("Logo_BRG.png")
-    b64_light = get_b64("Logo_BRGTemaClaro.png")
-    
-    # Se não tiver a clara, usa a escura
-    if not b64_light: 
-        # Fallback silencioso
-        b64_light = b64_dark
-    if not b64_dark: b64_dark = b64_light 
+    b64_light = get_b64("Logo_BRGTemaClaro.png") # Agora obrigatório a imagem clara existir
 
-    # 2. Injeta CSS com Variáveis CSS para imagens
-    st.markdown(
-        f"""
+    # Se falhar, duplicar a escura
+    if not b64_light: b64_light = b64_dark
+    if not b64_dark: b64_dark = b64_light
+
+    # SVG Inline com CSS interno para preencher e trocar
+    svg = f"""
+    <svg width="{width}" height="{height}" viewBox="0 0 500 150" xmlns="http://www.w3.org/2000/svg" class="adaptive-svg-logo">
         <style>
-            :root {{
-                /* Configuração de Cores do Tema */
+            /* Padrão para SVG */
+            .logo-img-dark {{ display: block; }}
+            .logo-img-light {{ display: none; }}
+            
+            /* Detecção de Sistema Operacional */
+            @media (prefers-color-scheme: light) {{
+                .logo-img-dark {{ display: none; }}
+                .logo-img-light {{ display: block; }}
+            }}
+        </style>
+        <!-- Imagem Escura (Default) -->
+        <image href="data:image/png;base64,{b64_dark}" width="500" height="150" class="logo-img-dark" />
+        <!-- Imagem Clara -->
+        <image href="data:image/png;base64,{b64_light}" width="500" height="150" class="logo-img-light" />
+    </svg>
+    """
+    return svg
+
+def inject_styles():
+    # Injeta apenas o CSS global que controla as classes do SVG
+    st.markdown(
+        """
+        <style>
+            :root {
                 --card-bg: var(--secondary-background-color);
                 --card-border: var(--background-color);
-                
-                /* Definição das Imagens */
-                --img-logo-dark: url('data:image/png;base64,{b64_dark}');
-                --img-logo-light: url('data:image/png;base64,{b64_light}');
-            }}
+            }
             
-            /* --- LOGO ADAPTÁVEL --- */
+            /* --- CONTROLE DO SVG VIA CSS GLOBAL DO STREAMLIT --- */
+            /* Isso garante que a troca de tema do menu Settings funcione */
             
-            .logo-adaptive {{
-                display: block;
-                background-size: contain;
-                background-repeat: no-repeat;
-                background-position: center;
-                /* Padrão: Logo Escuro */
-                background-image: var(--img-logo-dark);
-                transition: background-image 0.2s ease-in-out;
-            }}
-
-            /* --- REGRAS DE TROCA (Swapping) --- */
-
-            /* 1. Atributos Nativos do Streamlit (Se funcionarem) */
-            [data-theme="light"] .logo-adaptive,
-            section[data-theme="light"] .logo-adaptive,
-            html[data-theme="light"] .logo-adaptive {{
-                background-image: var(--img-logo-light) !important;
-            }}
+            /* Se o TEMA for LIGHT... */
+            [data-theme="light"] .adaptive-svg-logo .logo-img-dark,
+            section[data-theme="light"] .adaptive-svg-logo .logo-img-dark,
+            body.detected-light .adaptive-svg-logo .logo-img-dark {
+                display: none !important;
+            }
             
-            /* 2. Preferência do Sistema (OS) */
-            @media (prefers-color-scheme: light) {{
-                html:not([data-theme="dark"]) .logo-adaptive,
-                [data-testid="stApp"]:not([data-theme="dark"]) .logo-adaptive {{
-                     background-image: var(--img-logo-light) !important;
-                }}
-            }}
+            [data-theme="light"] .adaptive-svg-logo .logo-img-light,
+            section[data-theme="light"] .adaptive-svg-logo .logo-img-light,
+            body.detected-light .adaptive-svg-logo .logo-img-light {
+                display: block !important;
+            }
             
-            /* 3. CLASSE FORÇADA VIA JS (Detected Light) */
-            /* O script abaixo adiciona essa classe ao body se detectar fundo branco */
-            body.detected-light .logo-adaptive,
-            .detected-light .logo-adaptive {{
-                background-image: var(--img-logo-light) !important;
-            }}
-
-            /* --- ESTILOS GERAIS (Recuperados) --- */
-            .yellow-header {{
+            /* ------------------------------------------------ */     /* --- ESTILOS GERAIS (Recuperados) --- */
+            .yellow-header {
                 background-color: #FACC15;
                 color: #0F172A;
                 padding: 5px;

@@ -181,68 +181,60 @@ def inject_styles():
         </style>
         
         <script>
-            // SCRIPT SENSOR DE TEMA (BASEADO EM VARIÁVEIS DO STREAMLIT)
-            // O Streamlit injeta a variável --text-color no Iframe.
-            // Se o texto for escuro (#31333F ou preto), o fundo é claro (Light Mode).
-            // Se o texto for claro (branco), o fundo é escuro (Dark Mode).
+            // SCRIPT SENSOR DE TEMA (ROBUSTO)
+            // Monitora mudanças no atributo 'data-theme' e na variável --text-color
             
-            function detectStreamlitTheme() {
+            function updateThemeClass() {
                 const body = document.body;
-                // Pega o valor computado da variável CSS --text-color
+                
+                // Detecção via cor do texto (mais confiável em iframes do Streamlit)
+                // Se o texto é escuro, o fundo é claro (Light Mode)
                 const style = getComputedStyle(body);
-                // Tenta pegar --text-color (padrão streamlit) ou fallback para color
                 let textColor = style.getPropertyValue('--text-color').trim();
+                if (!textColor) textColor = style.color;
                 
-                // Se não encontrar a variável (raro), pega a cor computada do corpo
-                if (!textColor) {
-                    textColor = style.color;
-                }
-                
-                // Função auxiliar para saber se a cor é escura (brightness)
-                function isColorDark(colorString) {
-                    // Converte cores nomeadas ou hex para RGB se necessário (simplificado)
-                    // Streamlit geralmente retorna hex (#31333F) ou rgb.
-                    
-                    if (colorString.startsWith('#')) {
-                        const hex = colorString.substring(1);
+                // Função de brilho
+                function isColorDark(colorStr) {
+                    if (colorStr.startsWith('#')) {
+                        const hex = colorStr.substring(1);
                         const r = parseInt(hex.substr(0, 2), 16);
                         const g = parseInt(hex.substr(2, 2), 16);
                         const b = parseInt(hex.substr(4, 2), 16);
-                        // Fórmula de brilho (YIQ)
                         return ((r * 299) + (g * 587) + (b * 114)) / 1000 < 128;
-                    } else if (colorString.startsWith('rgb')) {
-                        const rgb = colorString.match(/\d+/g);
-                        if(rgb) {
-                            const r = parseInt(rgb[0]);
-                            const g = parseInt(rgb[1]);
-                            const b = parseInt(rgb[2]);
-                            return ((r * 299) + (g * 587) + (b * 114)) / 1000 < 128;
+                    } else if (colorStr.startsWith('rgb')) {
+                        const rgb = colorStr.match(/\d+/g);
+                        if(rgb && rgb.length >= 3) {
+                            return ((parseInt(rgb[0]) * 299) + (parseInt(rgb[1]) * 587) + (parseInt(rgb[2]) * 114)) / 1000 < 128;
                         }
                     }
-                    return true; // Default assume escuro se falhar
+                    return true; // Default Dark se falhar
                 }
                 
                 const textIsDark = isColorDark(textColor);
-                console.log("Theme Sensor: Text Color =", textColor, "Is Dark? =", textIsDark, "-> Mode:", textIsDark ? "LIGHT" : "DARK");
-                
-                // LÓGICA: Se o texto é escuro, o TEMA É CLARO.
+                // console.log("Theme Sensor: TextDark?", textIsDark);
+
                 if (textIsDark) {
                     if (!body.classList.contains('detected-light')) {
-                        console.log("Adding detected-light class");
                         body.classList.add('detected-light');
                     }
                 } else {
                     if (body.classList.contains('detected-light')) {
-                        console.log("Removing detected-light class");
                         body.classList.remove('detected-light');
                     }
                 }
             }
+
+            // Executa imediatamente
+            updateThemeClass();
             
-            // Roda imediatamente
-            detectStreamlitTheme();
-            // Roda periodicamente (para pegar a troca feita no menu Settings)
-            setInterval(detectStreamlitTheme, 1000);
+            // Re-executa periodicamente (Polling de 1s) para garantir detecção tardia
+            setInterval(updateThemeClass, 1000);
+            
+            // Monitora mudanças de atributos no Body (ex: data-theme ou style mudando)
+            const observer = new MutationObserver(function(mutations) {
+                updateThemeClass();
+            });
+            observer.observe(document.body, { attributes: true, attributeFilter: ['class', 'style', 'data-theme'] });
         </script>
         """,
         unsafe_allow_html=True,

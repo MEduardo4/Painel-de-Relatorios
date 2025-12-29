@@ -46,6 +46,8 @@ def get_adaptive_logo_svg(width="100%", height="auto"):
 
     b64_dark = get_b64("Logo_BRG.png")
     b64_light = get_b64("Logo_BRGTemaClaro.png") # Agora obrigatório a imagem clara existir
+    
+    print(f"DEBUG: Logo Light loaded? {bool(b64_light)} (Len: {len(b64_light)})")
 
     # Se falhar, duplicar a escura
     if not b64_light: b64_light = b64_dark
@@ -174,8 +176,8 @@ def inject_styles():
             }
             
             /* 3. CLASSE FORÇADA VIA JS (Detected Light) */
-            body.detected-light .logo-adaptive,
-            .detected-light .logo-adaptive {
+            body.detected-light .adaptive-logo-container,
+            .detected-light .adaptive-logo-container {
                 background-image: var(--img-logo-light) !important;
             }
         </style>

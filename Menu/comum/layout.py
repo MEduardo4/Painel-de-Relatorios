@@ -47,17 +47,31 @@ def get_adaptive_logo_svg(width="100%", height="auto"):
     b64_dark = get_b64("Logo_BRG.png")
     b64_light = get_b64("Logo_BRGTemaClaro.png") # Agora obrigatório a imagem clara existir
     
-    print(f"DEBUG: Logo Light loaded? {bool(b64_light)} (Len: {len(b64_light)})")
+    import streamlit as st
+    
+    # 1. Tenta detectar tema via Python (Server-Side) para render inicial correta
+    initial_theme = "dark"
+    try:
+        # Streamlit >= 1.40 usa st.context.theme
+        theme_obj = getattr(st, "context", None) and getattr(st.context, "theme", None)
+        if theme_obj:
+            # Tenta atributos conhecidos (.base ou .type)
+            initial_theme = getattr(theme_obj, "base", getattr(theme_obj, "type", "dark"))
+    except:
+        pass
 
-    # Se falhar, duplicar a escura
-    if not b64_light: b64_light = b64_dark
-    if not b64_dark: b64_dark = b64_light
+    # Define classe inicial baseada no contexto do Python
+    initial_class = "ctx-light" if initial_theme == "light" else "ctx-dark"
 
     # Validar unidades para CSS (adicionar px se for apenas número)
     if str(width).isdigit(): width = f"{width}px"
     if str(height).isdigit(): height = f"{height}px"
 
     # CSS Background Image approach (More robust)
+    # Estratégia:
+    # 1. ctx-light/dark: Definido pelo Python (estado inicial)
+    # 2. detected-light/dark: Definido pelo JS (mudança dinâmica sem rerun)
+    
     html = f"""
 <style>
     .adaptive-logo-container {{
@@ -66,53 +80,57 @@ def get_adaptive_logo_svg(width="100%", height="auto"):
         background-size: contain;
         background-repeat: no-repeat;
         background-position: center;
-        background-image: url('data:image/png;base64,{b64_dark}');
+        transition: background-image 0.3s ease-in-out;
     }}
     
-    /* Light Mode Overrides */
+    /* Default / Dark Base */
+    .adaptive-logo-container {{ background-image: url('data:image/png;base64,{b64_dark}'); }}
+    
+    /* Server-Side State (Python Context) */
+    .adaptive-logo-container.ctx-light {{ background-image: url('data:image/png;base64,{b64_light}'); }}
+    .adaptive-logo-container.ctx-dark  {{ background-image: url('data:image/png;base64,{b64_dark}'); }}
+    
+    /* Client-Side Overrides (JS Sensor - !important para vencer o Python se houver drift) */
+    body.detected-light .adaptive-logo-container {{ 
+        background-image: url('data:image/png;base64,{b64_light}') !important; 
+    }}
+    body.detected-dark .adaptive-logo-container {{ 
+        background-image: url('data:image/png;base64,{b64_dark}') !important; 
+    }}
+    
+    /* Media Query Fallback (OS preference) */
     @media (prefers-color-scheme: light) {{
-        .adaptive-logo-container {{
+        .adaptive-logo-container:not(.ctx-dark) {{
             background-image: url('data:image/png;base64,{b64_light}');
         }}
     }}
-    
-    body.detected-light .adaptive-logo-container,
-    [data-theme="light"] .adaptive-logo-container {{
-        background-image: url('data:image/png;base64,{b64_light}') !important;
-    }}
 </style>
-<div class="adaptive-logo-container"></div>
+<div class="adaptive-logo-container {initial_class}"></div>
 """
     return html
 
 def inject_styles():
-    # Injeta apenas o CSS global que controla as classes do SVG
+    # Injeta apenas o CSS global (KPIs, Badges) e o Script Sensor de Tema
+    
     st.markdown(
         """
         <style>
+            /* 1. ESTILOS GERAIS */
             :root {
                 --card-bg: var(--secondary-background-color);
                 --card-border: var(--background-color);
             }
             
-            /* --- CONTROLE DO SVG VIA CSS GLOBAL DO STREAMLIT --- */
-            /* Isso garante que a troca de tema do menu Settings funcione */
-            
-            /* Se o TEMA for LIGHT... */
-            [data-theme="light"] .adaptive-svg-logo .logo-img-dark,
-            section[data-theme="light"] .adaptive-svg-logo .logo-img-dark,
-            body.detected-light .adaptive-svg-logo .logo-img-dark {
-                display: none !important;
+            [data-testid="stSidebar"] {
+                background-color: var(--secondary-background-color);
             }
             
-            [data-theme="light"] .adaptive-svg-logo .logo-img-light,
-            section[data-theme="light"] .adaptive-svg-logo .logo-img-light,
-            body.detected-light .adaptive-svg-logo .logo-img-light {
-                display: block !important;
+            .block-container {
+                padding-top: 2rem;
+                padding-bottom: 2rem;
             }
             
-            /* ------------------------------------------------ */
-            /* --- ESTILOS GERAIS (Recuperados) --- */
+            /* 2. BADGES & LABELS */
             .yellow-header {
                 background-color: #FACC15;
                 color: #0F172A;
@@ -153,6 +171,25 @@ def inject_styles():
                 opacity: 0.6;
             }
             
+            .sidebar-badge {
+                background: #FF4B4B;
+                color: white;
+                padding: 4px 8px;
+                border-radius: 4px;
+                font-size: 12px;
+                font-weight: bold;
+                margin-left: auto;
+            }
+            
+            .sidebar-badge.neutral {
+                background: #777;
+            }
+            
+            .last-updated {
+                font-size: 12px;
+                opacity: 0.6;
+            }
+            
             .toolbar {
                 display: flex;
                 gap: 8px;
@@ -170,27 +207,19 @@ def inject_styles():
                 border: 1px solid var(--background-color);
             }
 
-            /* Sidebar Input Fix */
             section[data-testid="stSidebar"] .stTextInput > div > div {
                 border-radius: 8px;
-            }
-            
-            /* 3. CLASSE FORÇADA VIA JS (Detected Light) */
-            body.detected-light .adaptive-logo-container,
-            .detected-light .adaptive-logo-container {
-                background-image: var(--img-logo-light) !important;
             }
         </style>
         
         <script>
             // SCRIPT SENSOR DE TEMA (ROBUSTO)
-            // Monitora mudanças no atributo 'data-theme' e na variável --text-color
+            // Monitora mudanças para alternar classes no body
             
             function updateThemeClass() {
                 const body = document.body;
                 
-                // Detecção via cor do texto (mais confiável em iframes do Streamlit)
-                // Se o texto é escuro, o fundo é claro (Light Mode)
+                // Detecção via cor do texto
                 const style = getComputedStyle(body);
                 let textColor = style.getPropertyValue('--text-color').trim();
                 if (!textColor) textColor = style.color;
@@ -209,30 +238,34 @@ def inject_styles():
                             return ((parseInt(rgb[0]) * 299) + (parseInt(rgb[1]) * 587) + (parseInt(rgb[2]) * 114)) / 1000 < 128;
                         }
                     }
-                    return true; // Default Dark se falhar
+                    return true; // Default Dark
                 }
                 
                 const textIsDark = isColorDark(textColor);
-                // console.log("Theme Sensor: TextDark?", textIsDark);
 
                 if (textIsDark) {
+                    // LIGHT MODE DETECTADO
                     if (!body.classList.contains('detected-light')) {
                         body.classList.add('detected-light');
                     }
+                    if (body.classList.contains('detected-dark')) {
+                        body.classList.remove('detected-dark');
+                    }
                 } else {
+                    // DARK MODE DETECTADO
+                    if (!body.classList.contains('detected-dark')) {
+                        body.classList.add('detected-dark');
+                    }
                     if (body.classList.contains('detected-light')) {
                         body.classList.remove('detected-light');
                     }
                 }
             }
 
-            // Executa imediatamente
+            // Executa imediatamente e periodicamente
             updateThemeClass();
-            
-            // Re-executa periodicamente (Polling de 1s) para garantir detecção tardia
             setInterval(updateThemeClass, 1000);
             
-            // Monitora mudanças de atributos no Body (ex: data-theme ou style mudando)
             const observer = new MutationObserver(function(mutations) {
                 updateThemeClass();
             });

@@ -121,6 +121,14 @@ def inject_styles():
                 --card-border: var(--background-color);
             }
             
+            /* Hide Streamlit Header Anchors (Chain Icon) */
+            h1 a, h2 a, h3 a, h4 a, h5 a, h6 a {
+                display: none !important;
+            }
+            [data-testid="stHeaderActionElements"] {
+                display: none !important;
+            }
+            
             [data-testid="stSidebar"] {
                 background-color: var(--secondary-background-color);
             }
